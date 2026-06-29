@@ -1,10 +1,198 @@
-# Ascendion Design System
+# ppt-gen-v2 — Ascendion Deck Generator
 
-A living design system for **Ascendion** — an AI-native IT services, consulting, and product engineering company. This system captures the brand's visual language, typography, color palette, content tone, and reusable HTML/JSX components so design agents can produce on-brand decks, mocks, and prototypes.
+A fully self-contained pipeline that turns text content into branded Ascendion PowerPoint decks. Built on top of the Ascendion HTML design system in this repo. Runs entirely via Claude Code in headless mode — no external API keys, no manual steps.
 
 > _"Engineering To The Power Of AI."_  
 > _"We. Do. Software."_  
 > _"AI-Native software engineering."_
+
+---
+
+## What This Project Is
+
+This is the second attempt at automating Ascendion deck generation. The [first project (`ppt-gen`)](../ppt-gen/) used Azure OpenAI + python-pptx and stalled on coordinate arithmetic, cross-slide consistency, and the difficulty of reviewing output without a visual feedback loop. This v2 is a clean rewrite with a fundamentally different approach.
+
+**Key differences from v1:**
+
+| | ppt-gen (v1) | ppt-gen-v2 |
+|---|---|---|
+| LLM access | Azure OpenAI / Gemini via API keys | Claude Code headless mode, enterprise account |
+| Rendering medium | python-pptx (coordinate arithmetic) | HTML/CSS (pre-built components in this repo) |
+| Visual review | LibreOffice → PDF → raster | Claude vision model reads slide screenshots directly |
+| Output | PPTX from python-pptx | PPTX via html-to-pptx conversion |
+| Component reuse | None — code written from scratch each run | All slide components pre-built here; zero new code per run |
+
+---
+
+## Pipeline Architecture
+
+```
+User content (text, bullets, optional viz cues)
+        │
+        ▼
+  ┌─────────────────────────────────────────────┐
+  │  PHASE 1 — PLAN                             │
+  │  Claude reads content + design system,      │
+  │  outputs a deck plan: slide count, types,   │
+  │  layout archetype per slide, content map.   │
+  └─────────────────┬───────────────────────────┘
+                    │
+                    ▼
+  ┌─────────────────────────────────────────────┐
+  │  PHASE 2 — BUILD (HTML)                     │
+  │  Claude assembles each slide from the       │
+  │  pre-built component library in /slides/.   │
+  │  No new CSS or layout code written.         │
+  │  Output: a single self-contained HTML file. │
+  └─────────────────┬───────────────────────────┘
+                    │
+                    ▼
+  ┌─────────────────────────────────────────────┐
+  │  PHASE 3 — VISUAL REVIEW (slide-by-slide)   │
+  │  Headless browser screenshots each slide.   │
+  │  Claude vision model inspects each image:   │
+  │  overflow, contrast, alignment, density,    │
+  │  brand adherence. Emits a fix list.         │
+  └─────────────────┬───────────────────────────┘
+                    │
+                    ▼
+  ┌─────────────────────────────────────────────┐
+  │  PHASE 4 — REPAIR                           │
+  │  Claude applies the fix list to the HTML.   │
+  │  Re-screenshots only changed slides.        │
+  │  Repeats until no critical issues remain    │
+  │  (max 2 repair rounds).                     │
+  └─────────────────┬───────────────────────────┘
+                    │
+                    ▼
+  ┌─────────────────────────────────────────────┐
+  │  PHASE 5 — EXPORT (HTML → PPTX)             │
+  │  html-to-pptx conversion step.              │
+  │  Each slide div becomes a native PPTX slide │
+  │  at 1920×1080 (16:9).                       │
+  └─────────────────┬───────────────────────────┘
+                    │
+                    ▼
+  ┌─────────────────────────────────────────────┐
+  │  PHASE 6 — FINAL VISUAL PASS                │
+  │  Claude vision re-reviews the PPTX export   │
+  │  to catch any conversion artifacts or       │
+  │  font/layout regressions introduced by      │
+  │  the html-to-pptx step.                     │
+  └─────────────────┬───────────────────────────┘
+                    │
+                    ▼
+             output.pptx
+```
+
+### Design principles (lessons from v1)
+
+- **HTML, not coordinate arithmetic.** The browser handles layout. CSS grid and flexbox solve the geometry problems that broke v1's python-pptx approach.
+- **Pre-built components, not generated code.** Every slide archetype lives in `/slides/` already. Claude selects and populates — it never writes layout code from scratch.
+- **Vision review closes the loop.** The model actually _sees_ the slides. v1 had no visual feedback until a human opened the file.
+- **Claude headless, not external APIs.** Uses the Claude enterprise account via `claude --headless` — no `.env`, no API key rotation, no Azure endpoint management.
+- **One command, one output file.** The entire pipeline is a single CLI invocation. The PPTX drops in the current directory.
+
+---
+
+## Repository Structure
+
+```
+/
+├── README.md                       ← you are here (project + design system docs)
+├── SKILL.md                        ← Claude Code skill wrapper
+├── colors_and_type.css             ← brand tokens (color, type, space, motion)
+│
+├── slides/                         ← pre-built slide component library
+│   ├── index.html                  ← 8 corporate master templates
+│   ├── extended-templates.html     ← 10 additional archetypes
+│   ├── TitleSlide.jsx
+│   ├── StatGridSlide.jsx
+│   ├── OfferingsSlide.jsx
+│   ├── ThreeColumnSlide.jsx
+│   ├── BigQuoteSlide.jsx
+│   ├── AwardSlide.jsx
+│   └── CaseStudySlide.jsx
+│
+├── assets/
+│   ├── logos/                      ← Ascendion wordmark + A-mark SVGs
+│   ├── brand-imagery/              ← hero photos, signature graphics
+│   └── badges/                     ← analyst recognition badges
+│
+├── preview/                        ← design system tab cards (one per concept)
+│
+├── pipeline/                       ← generation pipeline (to be built)
+│   ├── run.sh                      ← entry point: `./pipeline/run.sh "content.md"`
+│   ├── prompts/                    ← system prompts for each phase
+│   │   ├── 01-plan.md
+│   │   ├── 02-build.md
+│   │   ├── 03-review.md
+│   │   ├── 04-repair.md
+│   │   └── 06-final-check.md
+│   └── scripts/                    ← phase runner scripts
+│       ├── screenshot.js           ← headless browser → slide images
+│       └── html_to_pptx.py         ← HTML → PPTX conversion
+│
+└── decks/                          ← finished decks built from this system
+    └── Legacy System X-Ray & Navigator.html
+```
+
+---
+
+## Usage
+
+```bash
+# Basic usage — pass a content file, get a PPTX back
+./pipeline/run.sh inputs/my-content.md
+
+# Outputs: my-content.pptx in the current directory
+# Intermediate artifacts in: runs/<timestamp>/
+```
+
+Content files are plain text or markdown. Include any visualization cues inline:
+
+```markdown
+# Q3 Business Review
+
+## Slide intent
+Executive summary for CIO audience. Confident tone. 4-5 slides max.
+
+## Key messages
+- Revenue up 23% YoY driven by AI Services practice
+- Three new Fortune 500 logos added in Q3
+- AAVA platform now deployed at 12 enterprise clients
+
+[viz: stat grid — 23%, 3, 12 as hero numbers]
+
+## Challenges
+GenAI adoption is accelerating faster than our delivery capacity...
+```
+
+The `[viz: ...]` cues are optional hints to the planner. Without them, Claude infers appropriate layouts from the content structure and message type.
+
+---
+
+## Implementation Status
+
+**Current state:** Design system complete. Pipeline not yet built.
+
+### Build order
+
+- [x] Design system — brand tokens, color, typography, motion
+- [x] Slide component library — 18 archetypes across `index.html` + `extended-templates.html`
+- [ ] Phase 1 — planner prompt + output schema
+- [ ] Phase 2 — builder prompt + component selection logic
+- [ ] Phase 3/4 — screenshot tooling + vision review prompt + repair loop
+- [ ] Phase 5 — html-to-pptx conversion script
+- [ ] Phase 6 — final visual check prompt
+- [ ] `run.sh` — orchestrator tying all phases together
+- [ ] End-to-end test with a real content brief
+
+---
+
+## Design System Reference
+
+The rest of this document is the Ascendion design system specification — the ground truth for brand tokens, typography, color, layout rules, and component conventions that the pipeline uses to produce on-brand output.
 
 ---
 
@@ -48,38 +236,6 @@ Ascendion positions itself as **"an AI-native software engineering disruptor"** 
 
 ---
 
-## Index — what's in this folder
-
-```
-/
-├── README.md                       ← you are here
-├── SKILL.md                        ← Agent Skill wrapper (Claude Code compatible)
-├── colors_and_type.css             ← all tokens (color + type + space + motion)
-├── assets/
-│   ├── logos/                      ← Ascendion wordmark + A-mark SVGs
-│   ├── brand-imagery/              ← hero photos, signature graphics
-│   └── badges/                     ← analyst recognition badges
-├── preview/                        ← Design System tab cards
-│   ├── 01-brand-mark.html
-│   ├── 02-colors-core.html
-│   ├── ... (one card per concept)
-├── slides/                         ← deck master recreations
-│   ├── index.html                  ← 8 corporate master templates (corp deck style)
-│   ├── extended-templates.html     ← 10 archetypes from team reference deck
-│   ├── TitleSlide.jsx
-│   ├── StatGridSlide.jsx
-│   ├── OfferingsSlide.jsx
-│   ├── ThreeColumnSlide.jsx
-│   ├── BigQuoteSlide.jsx
-│   ├── AwardSlide.jsx
-│   └── CaseStudySlide.jsx
-├── decks/                          ← finished decks built FROM this system
-│   └── Legacy System X-Ray & Navigator.html
-```
-
-> **Note:** No web product or app was provided for Ascendion, so there is no `ui_kits/` directory in this system — only deck templates and brand foundations. If a web product becomes available later, kits for it should live under `ui_kits/<product>/`.
-
----
 
 ## CONTENT FUNDAMENTALS
 
