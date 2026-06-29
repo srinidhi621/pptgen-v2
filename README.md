@@ -1,6 +1,6 @@
 # ppt-gen-v2 — Ascendion Deck Generator
 
-A fully self-contained pipeline that turns text content into branded Ascendion PowerPoint decks. Built on top of the Ascendion HTML design system in this repo. Runs entirely via Claude Code in headless mode — no external API keys, no manual steps.
+An **editable-PowerPoint generator** for Ascendion decks, driven entirely by Claude Code. Open Claude Code in this folder, describe the deck you want, and it builds an on-brand deck from the design system here and hands back an editable `.pptx` — real PowerPoint text boxes and shapes, not screenshots. No external API; a Claude Code enterprise license is the only requirement.
 
 > _"Engineering To The Power Of AI."_  
 > _"We. Do. Software."_  
@@ -16,83 +16,73 @@ This is the second attempt at automating Ascendion deck generation. The [first p
 
 | | ppt-gen (v1) | ppt-gen-v2 |
 |---|---|---|
-| LLM access | Azure OpenAI / Gemini via API keys | Claude Code headless mode, enterprise account |
-| Rendering medium | python-pptx (coordinate arithmetic) | HTML/CSS (pre-built components in this repo) |
-| Visual review | LibreOffice → PDF → raster | Claude vision model reads slide screenshots directly |
-| Output | PPTX from python-pptx | PPTX via html-to-pptx conversion |
-| Component reuse | None — code written from scratch each run | Pre-built component library; new code saved and documented for reuse |
+| LLM access | Azure OpenAI / Gemini via API keys | Claude Code, enterprise license — no keys |
+| Authoring medium | python-pptx coordinate math (the failure mode) | HTML/CSS — reuses the templates in this repo |
+| Output | python-pptx, built from scratch each run | Editable native PPTX via an HTML→OOXML converter |
+| Operation | external multi-step pipeline | one prompt to Claude Code in this folder |
 
 ---
 
-## Pipeline Architecture
+## How You Use It
+
+You don't run a pipeline. You open Claude Code in this folder and talk to it:
 
 ```
-User content (text, bullets, optional viz cues)
+$ cd ppt-gen-v2
+$ claude
+> Build a 6-slide deck for a CIO audience introducing our Legacy
+> Modernization offering. Confident tone. Content below:
+> ...
+```
+
+Claude reads the design skill, authors the deck in HTML, runs the converter, and hands you `decks/<name>.pptx`. That is the whole interface.
+
+## How It Works (Route A)
+
+```
+Your prompt + content
         │
         ▼
-  ┌─────────────────────────────────────────────┐
-  │  PHASE 1 — PLAN                             │
-  │  Claude reads content + design system,      │
-  │  outputs a deck plan: slide count, types,   │
-  │  layout archetype per slide, content map.   │
-  └─────────────────┬───────────────────────────┘
-                    │
-                    ▼
-  ┌─────────────────────────────────────────────┐
-  │  PHASE 2 — BUILD (HTML)                     │
-  │  Claude assembles each slide from the       │
-  │  pre-built component library in /slides/.   │
-  │  New code is saved back to /slides/ for     │
-  │  reuse in future runs.                      │
-  │  Output: a single self-contained HTML file. │
-  └─────────────────┬───────────────────────────┘
-                    │
-                    ▼
-  ┌─────────────────────────────────────────────┐
-  │  PHASE 3 — VISUAL REVIEW (slide-by-slide)   │
-  │  Headless browser screenshots each slide.   │
-  │  Claude vision model inspects each image:   │
-  │  overflow, contrast, alignment, density,    │
-  │  brand adherence. Emits a fix list.         │
-  └─────────────────┬───────────────────────────┘
-                    │
-                    ▼
-  ┌─────────────────────────────────────────────┐
-  │  PHASE 4 — REPAIR                           │
-  │  Claude applies the fix list to the HTML.   │
-  │  Re-screenshots only changed slides.        │
-  │  Repeats until no critical issues remain    │
-  │  (max 2 repair rounds).                     │
-  └─────────────────┬───────────────────────────┘
-                    │
-                    ▼
-  ┌─────────────────────────────────────────────┐
-  │  PHASE 5 — EXPORT (HTML → PPTX)             │
-  │  html-to-pptx conversion step.              │
-  │  Each slide div becomes a native PPTX slide │
-  │  at 1920×1080 (16:9).                       │
-  └─────────────────┬───────────────────────────┘
-                    │
-                    ▼
-  ┌─────────────────────────────────────────────┐
-  │  PHASE 6 — FINAL VISUAL PASS                │
-  │  Claude vision re-reviews the PPTX export   │
-  │  to catch any conversion artifacts or       │
-  │  font/layout regressions introduced by      │
-  │  the html-to-pptx step.                     │
-  └─────────────────┬───────────────────────────┘
-                    │
-                    ▼
-             output.pptx
+  Claude Code  ──reads──►  SKILL.md → README → slides/ templates
+        │
+        ▼
+  decks/<name>.html        ← Claude authors the deck in HTML, reusing
+        │                     the brand templates in slides/
+        ▼
+  tools/editable_pptx/export.py decks/<name>.html
+        │
+        ├─ 1. RENDER     headless Chromium loads the deck (bundled — invisible to you)
+        ├─ 2. CAPTURE    walk the DOM; record each element's geometry + computed styles
+        ├─ 3. CLASSIFY   each element → text / shape / image / rasterize
+        ├─ 4. TRANSLATE  CSS → OOXML: px→EMU, rgb→srgbClr, runs→<a:r>, rotation, radius
+        └─ 5. EMIT       assemble the .pptx (python-pptx skeleton + injected slide XML)
+        │
+        ▼
+  decks/<name>.pptx        ← editable native PowerPoint
 ```
 
-### Design principles (lessons from v1)
+The converter walks **arbitrary DOM** — it does not assume a fixed set of template classes. Real decks invent their own section types: the Legacy deck in `decks/` uses `s-problem`, `s-pipeline`, `s-tier` and others that exist in no template library. Whatever the browser renders, the walker reads back as geometry.
 
-- **HTML, not coordinate arithmetic.** The browser handles layout. CSS grid and flexbox solve the geometry problems that broke v1's python-pptx approach.
-- **Growing component library.** Every slide archetype lives in `/slides/`. Claude can write new components, but they are saved back with documentation so each run builds on prior work rather than starting from zero.
-- **Vision review closes the loop.** The model actually _sees_ the slides. v1 had no visual feedback until a human opened the file.
-- **Claude headless, not external APIs.** Uses the Claude enterprise account via `claude --headless` — no `.env`, no API key rotation, no Azure endpoint management.
-- **One command, one output file.** The entire pipeline is a single CLI invocation. The PPTX drops in the current directory.
+Full technical design — OOXML reference, module breakdown, unit math, escape hatches — lives in **[`SPEC.md`](SPEC.md)**.
+
+## Editable — With Asterisks
+
+"Editable" means real, clickable PowerPoint text boxes and shapes for the bulk of every slide. Some CSS has no OOXML equivalent and is **rasterized per-element** (embedded as an image, not editable):
+
+- Photo-knockout headlines (`background-clip: text`) — the hero "A" and photo-filled display words
+- CSS filters / `backdrop-filter`
+- Complex SVG (the `.s-arch` architecture diagrams)
+
+Rasterization is per-element, not per-slide — the rest of the slide stays editable. Expect, too: **1–3px text-wrap drift** (CSS and PowerPoint wrap with different font metrics), and a hard requirement to **embed fonts** in the `.pptx` so decks render correctly on machines without Archivo Black / Nunito Sans. These are the standing costs of the fidelity-plus-editable tradeoff; see `SPEC.md`.
+
+## Single Sources of Truth
+
+Two documents govern the build. Everything else — including this README's project section — defers to them:
+
+| Doc | Role |
+|---|---|
+| **[`SPEC.md`](SPEC.md)** | The *what* and *how* — architecture, contract, OOXML reference, module design, definition of done. |
+| **[`PLAN.md`](PLAN.md)** | The *board* — epics → stories → tasks, vertical slices, status, what's next. The live state of the build. |
 
 ---
 
@@ -100,94 +90,67 @@ User content (text, bullets, optional viz cues)
 
 ```
 /
-├── README.md                       ← you are here (project + design system docs)
-├── SKILL.md                        ← Claude Code skill wrapper
+├── README.md                       ← you are here (project overview + design system)
+├── SPEC.md                         ← build spec: architecture, OOXML, contract   ◄ source of truth
+├── PLAN.md                         ← JIRA-style board: epics / stories / tasks    ◄ source of truth
+├── SKILL.md                        ← Ascendion design skill (Claude-invocable)
+├── CLAUDE_CODE.md                  ← legacy screenshot-pipeline notes (superseded by SPEC)
 ├── colors_and_type.css             ← brand tokens (color, type, space, motion)
 │
-├── slides/                         ← pre-built slide component library
-│   ├── index.html                  ← 8 corporate master templates
-│   ├── extended-templates.html     ← 10 additional archetypes
-│   ├── TitleSlide.jsx
-│   ├── StatGridSlide.jsx
-│   ├── OfferingsSlide.jsx
-│   ├── ThreeColumnSlide.jsx
-│   ├── BigQuoteSlide.jsx
-│   ├── AwardSlide.jsx
-│   └── CaseStudySlide.jsx
+├── slides/                         ← HTML template library (the authoring substrate)
+│   ├── deck-stage.js               ← <deck-stage> runtime: scaling, nav, print
+│   ├── index.html                  ← 8 corporate templates (s-title, s-stats, s-three,
+│   │                                  s-quote, s-offer, s-award, s-case, s-section)
+│   └── extended-templates.html     ← 10 archetypes (s-quadstats, s-journey, s-playbook,
+│                                      s-arch, s-persona, s-scoping, s-services, s-team,
+│                                      s-roadmap, s-usecase)
 │
-├── assets/
-│   ├── logos/                      ← Ascendion wordmark + A-mark SVGs
-│   ├── brand-imagery/              ← hero photos, signature graphics
-│   └── badges/                     ← analyst recognition badges
+├── tools/
+│   ├── verify_deck.py              ← dev: screenshot + DOM overflow check
+│   ├── export_deck.py              ← legacy: PDF + screenshot-mode PPTX (not editable)
+│   └── editable_pptx/              ← THE BUILD: HTML→OOXML converter (see SPEC + PLAN)
 │
-├── preview/                        ← design system tab cards (one per concept)
-│
-├── pipeline/                       ← generation pipeline (to be built)
-│   ├── run.sh                      ← entry point: `./pipeline/run.sh "content.md"`
-│   ├── prompts/                    ← system prompts for each phase
-│   │   ├── 01-plan.md
-│   │   ├── 02-build.md
-│   │   ├── 03-review.md
-│   │   ├── 04-repair.md
-│   │   └── 06-final-check.md
-│   └── scripts/                    ← phase runner scripts
-│       ├── screenshot.js           ← headless browser → slide images
-│       └── html_to_pptx.py         ← HTML → PPTX conversion
-│
-└── decks/                          ← finished decks built from this system
+├── assets/                         ← logos, brand imagery, analyst badges
+├── preview/                        ← design-system specimen cards
+└── decks/                          ← finished decks (HTML, and exported PPTX)
     └── Legacy System X-Ray & Navigator.html
 ```
 
 ---
 
-## Usage
+## Setup (one-time, per machine)
 
 ```bash
-# Basic usage — pass a content file, get a PPTX back
-./pipeline/run.sh inputs/my-content.md
-
-# Outputs: my-content.pptx in the current directory
-# Intermediate artifacts in: runs/<timestamp>/
+python3 -m venv .venv
+.venv/bin/pip install playwright python-pptx pillow lxml
+.venv/bin/python -m playwright install chromium   # bundled browser — no system Chrome needed
 ```
 
-Content files are plain text or markdown. Include any visualization cues inline:
+The converter uses **bundled Chromium**, not your installed Chrome, so behaviour is identical on every colleague's machine.
+
+### What to give Claude
+
+A brief in plain language. Inline `[viz: …]` cues are optional hints:
 
 ```markdown
-# Q3 Business Review
-
-## Slide intent
-Executive summary for CIO audience. Confident tone. 4-5 slides max.
+# Q3 Business Review — CIO audience, confident tone, ~5 slides
 
 ## Key messages
-- Revenue up 23% YoY driven by AI Services practice
-- Three new Fortune 500 logos added in Q3
-- AAVA platform now deployed at 12 enterprise clients
-
-[viz: stat grid — 23%, 3, 12 as hero numbers]
-
-## Challenges
-GenAI adoption is accelerating faster than our delivery capacity...
+- Revenue up 23% YoY, driven by the AI Services practice
+- Three new Fortune 500 logos in Q3
+- AAVA™ now deployed at 12 enterprise clients
+[viz: stat grid — 23 / 3 / 12 as hero numbers]
 ```
 
-The `[viz: ...]` cues are optional hints to the planner. Without them, Claude infers appropriate layouts from the content structure and message type.
+Without cues, Claude infers layout from content shape and message type.
 
 ---
 
-## Implementation Status
+## Status
 
-**Current state:** Design system complete. Pipeline not yet built.
+The design system and HTML template library are complete. The HTML→OOXML converter is the active build.
 
-### Build order
-
-- [x] Design system — brand tokens, color, typography, motion
-- [x] Slide component library — 18 archetypes across `index.html` + `extended-templates.html`
-- [ ] Phase 1 — planner prompt + output schema
-- [ ] Phase 2 — builder prompt + component selection logic
-- [ ] Phase 3/4 — screenshot tooling + vision review prompt + repair loop
-- [ ] Phase 5 — html-to-pptx conversion script
-- [ ] Phase 6 — final visual check prompt
-- [ ] `run.sh` — orchestrator tying all phases together
-- [ ] End-to-end test with a real content brief
+**The live build state — what's done, in progress, and next — is in [`PLAN.md`](PLAN.md).** This README does not track build status; `PLAN.md` does.
 
 ---
 

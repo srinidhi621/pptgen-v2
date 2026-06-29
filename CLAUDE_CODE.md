@@ -1,5 +1,12 @@
 # Ascendion Design — Claude Code Integration
 
+> ⚠️ **SUPERSEDED — historical reference only.** This describes the original
+> Designer/Verifier/Exporter **screenshot-mode** pipeline (non-editable PPTX).
+> The active project builds an **editable** PPTX converter (Route A). The two
+> sources of truth are **[`SPEC.md`](SPEC.md)** (design) and **[`PLAN.md`](PLAN.md)**
+> (build board). The screenshot exporter (`tools/export_deck.py`) still works as a
+> fallback, which is why this file is kept — but don't treat it as the plan.
+
 > A self-contained skill for **Claude Code** that replicates the design-build-verify-export pipeline.
 > Paste this file at the start of a Claude Code session, or reference it with `@CLAUDE_CODE.md`.
 
