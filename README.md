@@ -20,7 +20,7 @@ This is the second attempt at automating Ascendion deck generation. The [first p
 | Rendering medium | python-pptx (coordinate arithmetic) | HTML/CSS (pre-built components in this repo) |
 | Visual review | LibreOffice → PDF → raster | Claude vision model reads slide screenshots directly |
 | Output | PPTX from python-pptx | PPTX via html-to-pptx conversion |
-| Component reuse | None — code written from scratch each run | All slide components pre-built here; zero new code per run |
+| Component reuse | None — code written from scratch each run | Pre-built component library; new code saved and documented for reuse |
 
 ---
 
@@ -42,7 +42,8 @@ User content (text, bullets, optional viz cues)
   │  PHASE 2 — BUILD (HTML)                     │
   │  Claude assembles each slide from the       │
   │  pre-built component library in /slides/.   │
-  │  No new CSS or layout code written.         │
+  │  New code is saved back to /slides/ for     │
+  │  reuse in future runs.                      │
   │  Output: a single self-contained HTML file. │
   └─────────────────┬───────────────────────────┘
                     │
@@ -88,7 +89,7 @@ User content (text, bullets, optional viz cues)
 ### Design principles (lessons from v1)
 
 - **HTML, not coordinate arithmetic.** The browser handles layout. CSS grid and flexbox solve the geometry problems that broke v1's python-pptx approach.
-- **Pre-built components, not generated code.** Every slide archetype lives in `/slides/` already. Claude selects and populates — it never writes layout code from scratch.
+- **Growing component library.** Every slide archetype lives in `/slides/`. Claude can write new components, but they are saved back with documentation so each run builds on prior work rather than starting from zero.
 - **Vision review closes the loop.** The model actually _sees_ the slides. v1 had no visual feedback until a human opened the file.
 - **Claude headless, not external APIs.** Uses the Claude enterprise account via `claude --headless` — no `.env`, no API key rotation, no Azure endpoint management.
 - **One command, one output file.** The entire pipeline is a single CLI invocation. The PPTX drops in the current directory.
