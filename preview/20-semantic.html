@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ascendion · Semantic Colors</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; color: #0A0A0F; }
+  .card { width: 700px; padding: 24px 32px; box-sizing: border-box; }
+  .label { font-family: var(--font-body); font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #71758A; margin-bottom: 14px; }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+  .alert { display: flex; gap: 12px; padding: 12px 14px; border-radius: 4px; align-items: flex-start; font-family: var(--font-body); }
+  .alert .dot { width: 6px; min-width: 6px; height: 6px; border-radius: 999px; margin-top: 7px; }
+  .alert b { font-size: 13px; }
+  .alert p { margin: 2px 0 0; font-size: 12px; color: #71758A; line-height: 1.4; }
+  .ok { background: rgba(0,250,194,0.10); border-left: 3px solid #008566; }
+  .ok .dot { background: #008566; }
+  .warn { background: rgba(255,192,0,0.12); border-left: 3px solid #FFC000; }
+  .warn .dot { background: #FFC000; }
+  .err { background: rgba(227,5,108,0.08); border-left: 3px solid #E3056C; }
+  .err .dot { background: #E3056C; }
+  .info { background: rgba(113,97,226,0.10); border-left: 3px solid #7161E2; }
+  .info .dot { background: #7161E2; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Semantic feedback</div>
+  <div class="stack">
+    <div class="alert ok"><div class="dot"></div><div><b>Success — pipeline green.</b><p>All 24 AAVA™ studios passed quality gates.</p></div></div>
+    <div class="alert warn"><div class="dot"></div><div><b>In progress — agentic eval running.</b><p>Hallucination assessment 60% complete.</p></div></div>
+    <div class="alert err"><div class="dot"></div><div><b>Failed — adversarial check blocked.</b><p>Prompt-injection variant 14 returned unsafe output.</p></div></div>
+    <div class="alert info"><div class="dot"></div><div><b>New — agentic platform pilot scheduled.</b><p>Two business scenarios kicking off next sprint.</p></div></div>
+  </div>
+</div>
+</body>
+</html>

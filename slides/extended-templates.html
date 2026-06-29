@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ascendion · Extended Slide Templates</title>
+
+<script>
+/* Preview-server token forwarder — no-op when there is no ?t= token. */
+(function () {
+  var m = location.search.match(/[?&](t=[^&]+)/);
+  if (!m) return;
+  var tok = '?' + m[1];
+  function addTok(v){if(!v||v.indexOf('?')>=0||v.indexOf('data:')===0||v.indexOf('http')===0||v.indexOf('//')===0)return v;return v+tok;}
+  function inlineSvg(img){fetch(img.src).then(function(r){return r.text();}).then(function(text){if(text.indexOf('<svg')<0)return;var wrap=document.createElement('span');wrap.innerHTML=text;var svg=wrap.querySelector('svg');if(!svg)return;if(img.className)svg.setAttribute('class',img.className);if(img.getAttribute('style'))svg.setAttribute('style',img.getAttribute('style'));var w=img.getAttribute('width'),h=img.getAttribute('height');if(w)svg.setAttribute('width',w);if(h)svg.setAttribute('height',h);if(img.parentNode)img.parentNode.replaceChild(svg,img);}).catch(function(){});}
+  function fix(el){try{if(el.tagName==='IMG'){var src=el.getAttribute('src');if(!src)return;var withTok=addTok(src);if(withTok!==src)el.setAttribute('src',withTok);if(/\.svg(\?|$)/i.test(withTok))inlineSvg(el);}else if(el.tagName==='LINK'){var h=el.getAttribute('href');var withTok2=addTok(h);if(withTok2!==h)el.setAttribute('href',withTok2);}else if(el.tagName==='SCRIPT'||el.tagName==='SOURCE'){var s=el.getAttribute('src');var withTok3=addTok(s);if(withTok3!==s)el.setAttribute('src',withTok3);}}catch(e){}}
+  new MutationObserver(function(muts){muts.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType!==1)return;if(['IMG','SCRIPT','LINK','SOURCE'].indexOf(n.tagName)>=0)fix(n);if(n.querySelectorAll)n.querySelectorAll('img,script,link,source').forEach(fix);});});}).observe(document.documentElement,{subtree:true,childList:true});
+  function fixBgUrls(){Array.from(document.styleSheets).forEach(function(sheet){try{Array.from(sheet.cssRules||[]).forEach(function(rule){if(!rule.style)return;var bg=rule.style.backgroundImage||rule.style.background;if(bg&&bg.indexOf('url(')>=0&&bg.indexOf('?t=')<0&&bg.indexOf('data:')<0){var fixed=bg.replace(/url\((['"]?)([^'")]+)\1\)/g,function(m,q,u){if(u.indexOf('http')===0||u.indexOf('//')===0||u.indexOf('data:')===0||u.indexOf('?')>=0)return m;return'url('+q+u+tok+q+')';});if(fixed!==bg)rule.style.backgroundImage=fixed;}});}catch(e){}});}
+  document.addEventListener('DOMContentLoaded',fixBgUrls);
+  window.addEventListener('load',fixBgUrls);
+})();
+</script>
+
+<link rel="stylesheet" href="../colors_and_type.css">
+
+<style>
+  /* ============================================================
+     EXTENDED SLIDE TEMPLATES
+     Archetypes lifted from the internal team reference deck and
+     rendered in current Ascendion brand language. Each <section>
+     is a standalone template — copy whichever you need into a new
+     deck and refit content.
+     ============================================================ */
+
+  :root {
+    --stage-w: 1920px;
+    --stage-h: 1080px;
+    --pad: 80px;
+  }
+
+  html, body { margin: 0; padding: 0; background: #0A0A0F; overflow: hidden; }
+  deck-stage { background: #0A0A0F; }
+
+  section {
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: var(--pad);
+    display: flex;
+    flex-direction: column;
+    color: #0A0A0F;
+    background: #fff;
+    position: relative;
+  }
+  section.dark { background: #0A0A0F; color: #fff; }
+
+  /* ── Shared chrome ──────────────────────────────────────── */
+  .chrome-wm   { position: absolute; top: 32px; left: var(--pad); height: 22px; }
+  .chrome-page { position: absolute; bottom: 32px; right: var(--pad); font-family: var(--font-mono); font-size: 13px; color: #71758A; letter-spacing: 0.16em; }
+  .chrome-conf { position: absolute; bottom: 32px; left: var(--pad); font-family: var(--font-body); font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #AFAAB9; }
+  section.dark .chrome-page,
+  section.dark .chrome-conf { color: rgba(255,255,255,0.5); }
+
+  .eyebrow {
+    font-family: var(--font-body); font-weight: 800;
+    font-size: 15px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--asc-mint-900); margin: 28px 0 16px;
+  }
+  section.dark .eyebrow { color: var(--asc-mint); }
+
+  .h2 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 56px; line-height: 1.0; letter-spacing: -0.02em;
+    margin: 0 0 32px; max-width: 1600px;
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     01 — QUAD STATS WITH SOURCES
+     Use for: market-sizing slides, "why this matters" intro slides
+     ════════════════════════════════════════════════════════════════ */
+  .s-quadstats h2 { font-family: var(--font-display); font-weight: 900; font-size: 60px; letter-spacing: -0.02em; line-height: 1.0; margin: 0 0 36px; max-width: 1500px; }
+  .s-quadstats .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; flex: 1; min-height: 0; }
+  .s-quadstats .tile { background: #F5F4F7; border-radius: 8px; padding: 32px 28px; display: flex; flex-direction: column; position: relative; }
+  .s-quadstats .tile.feature { background: #0A0A0F; color: #fff; }
+  .s-quadstats .tile::before { content:""; position: absolute; left:0; top:0; height: 4px; width: 56px; background: var(--asc-mint); border-radius: 4px 0 0 0; }
+  .s-quadstats .tile.feature::before { background: var(--asc-mint); }
+  .s-quadstats .tile.purple::before { background: var(--asc-purple); }
+  .s-quadstats .tile.orange::before { background: var(--asc-orange); }
+  .s-quadstats .tile.magenta::before { background: var(--asc-magenta); }
+  .s-quadstats .cat {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--asc-mint-900); margin-bottom: 18px;
+  }
+  .s-quadstats .tile.feature .cat,
+  .s-quadstats .tile.purple .cat   { color: var(--asc-mint); }
+  .s-quadstats .tile.orange .cat   { color: var(--asc-orange); }
+  .s-quadstats .tile.magenta .cat  { color: var(--asc-magenta); }
+  .s-quadstats .big {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 56px; line-height: 0.96; letter-spacing: -0.02em;
+    color: #0A0A0F; margin-bottom: 16px;
+  }
+  .s-quadstats .tile.feature .big { color: var(--asc-mint); }
+  .s-quadstats .big .accent { color: var(--asc-mint-900); }
+  .s-quadstats .tile.feature .big .accent { color: var(--asc-mint); }
+  .s-quadstats .body {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+    color: #4A4D5F;
+  }
+  .s-quadstats .tile.feature .body { color: #AFAAB9; }
+  .s-quadstats .sources {
+    margin-top: 32px;
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 24px;
+    background: #fff; border: 1px solid rgba(10,10,15,0.10);
+    border-radius: 999px;
+    font-family: var(--font-body); font-size: 14px;
+    color: #71758A;
+  }
+  .s-quadstats .sources .lbl {
+    font-weight: 800; color: #0A0A0F; letter-spacing: 0.16em; font-size: 11px; text-transform: uppercase;
+    padding-right: 14px; border-right: 1px solid rgba(10,10,15,0.12);
+  }
+  .s-quadstats .sources .src { color: var(--asc-mint-900); font-weight: 700; }
+
+  /* ════════════════════════════════════════════════════════════════
+     02 — HORIZONTAL JOURNEY (6 STAGES)
+     Use for: adoption maturity, transformation roadmap, methodology
+     ════════════════════════════════════════════════════════════════ */
+  .s-journey h2 { font-family: var(--font-display); font-weight: 900; font-size: 56px; letter-spacing: -0.02em; line-height: 1.0; margin: 0 0 40px; max-width: 1500px; }
+  .s-journey .stages { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; align-items: stretch; }
+  .s-journey .stage { position: relative; display: flex; flex-direction: column; }
+  .s-journey .stage .pin {
+    width: 36px; height: 36px; border-radius: 999px;
+    background: var(--asc-mint); color: #0A0A0F;
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 900; font-size: 16px;
+    margin-bottom: 16px;
+    border: 3px solid #fff; box-shadow: 0 0 0 2px var(--asc-mint);
+  }
+  .s-journey .stage .pname {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 20px; line-height: 1.05; letter-spacing: -0.005em;
+    color: #0A0A0F; margin-bottom: 14px;
+    min-height: 50px;
+  }
+  .s-journey .stage .substeps {
+    display: flex; flex-direction: column; gap: 6px;
+    background: #F5F4F7; border-radius: 6px; padding: 14px 14px;
+    flex: 1;
+  }
+  .s-journey .stage .substeps span {
+    font-family: var(--font-body); font-size: 13px; line-height: 1.4; color: #4A4D5F;
+  }
+  .s-journey .stage .substeps span::before { content: "·"; color: var(--asc-mint); margin-right: 6px; font-weight: 900; }
+  .s-journey .stage .out {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: #0A0A0F; color: #fff;
+    border-radius: 6px;
+    font-family: var(--font-body); font-size: 13px; line-height: 1.4;
+    min-height: 84px;
+    display: flex; align-items: flex-start;
+  }
+  .s-journey .stage .out::before { content: "→ "; color: var(--asc-mint); font-weight: 900; margin-right: 6px; }
+  .s-journey .rail {
+    position: absolute; top: 152px; left: 8%; right: 8%; height: 2px;
+    background: linear-gradient(90deg, var(--asc-mist) 0%, var(--asc-mint) 100%);
+    z-index: -1;
+  }
+  .s-journey .footer-strip {
+    margin-top: 32px;
+    padding: 18px 28px;
+    background: #F5F4F7; border-radius: 999px;
+    display: flex; align-items: center; gap: 20px;
+    font-family: var(--font-body); font-size: 15px;
+    color: #4A4D5F;
+  }
+  .s-journey .footer-strip .lbl {
+    font-weight: 800; color: var(--asc-mint-900); letter-spacing: 0.16em; font-size: 12px;
+    text-transform: uppercase;
+    padding-right: 18px; border-right: 1px solid rgba(10,10,15,0.12);
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     03 — PLAYBOOK (5-column FRAMEWORK)
+     Use for: methodology breakdown, "how we deliver" frameworks
+     ════════════════════════════════════════════════════════════════ */
+  .s-playbook h2 { font-family: var(--font-display); font-weight: 900; font-size: 60px; letter-spacing: -0.02em; line-height: 1.0; margin: 0 0 12px; max-width: 1500px; }
+  .s-playbook .sub { font-family: var(--font-body); font-size: 19px; color: #71758A; line-height: 1.5; max-width: 1300px; margin-bottom: 36px; }
+  .s-playbook .cols { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; flex: 1; min-height: 0; }
+  .s-playbook .col {
+    display: flex; flex-direction: column;
+    background: #F5F4F7; border-radius: 8px;
+    overflow: hidden;
+  }
+  .s-playbook .col .hdr {
+    background: #0A0A0F; color: #fff;
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .s-playbook .col .hdr .ico {
+    width: 32px; height: 32px; border-radius: 6px;
+    background: var(--asc-mint); color: #0A0A0F;
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 900; font-size: 16px;
+  }
+  .s-playbook .col .hdr .name {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 22px; letter-spacing: -0.005em;
+  }
+  .s-playbook .col .body { padding: 24px 22px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  .s-playbook .col .body .item {
+    font-family: var(--font-body); font-size: 14px; line-height: 1.5; color: #0A0A0F;
+    padding-left: 16px; position: relative;
+  }
+  .s-playbook .col .body .item::before {
+    content: ""; position: absolute; left: 0; top: 8px; width: 7px; height: 7px;
+    background: var(--asc-mint); border-radius: 50%;
+  }
+  .s-playbook .col .body .item b { color: var(--asc-mint-900); font-weight: 800; }
+
+  /* ════════════════════════════════════════════════════════════════
+     04 — REFERENCE ARCHITECTURE
+     Use for: technical solution overview, system topology, data flow
+     ════════════════════════════════════════════════════════════════ */
+  .s-arch h2 { font-family: var(--font-display); font-weight: 900; font-size: 52px; letter-spacing: -0.02em; line-height: 1.0; margin: 0 0 12px; }
+  .s-arch .sub { font-family: var(--font-body); font-size: 17px; color: #71758A; line-height: 1.5; margin-bottom: 28px; max-width: 1300px; }
+  .s-arch .canvas {
+    flex: 1;
+    background: #F5F4F7;
+    border-radius: 8px;
+    padding: 28px;
+    display: grid;
+    grid-template-columns: 200px 1fr 240px;
+    gap: 24px;
+    min-height: 0;
+  }
+  .s-arch .col-head {
+    font-family: var(--font-body); font-weight: 800; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #71758A;
+    text-align: center;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(10,10,15,0.10);
+  }
+  .s-arch .col { display: flex; flex-direction: column; min-height: 0; }
+  .s-arch .col .stack { display: flex; flex-direction: column; gap: 10px; flex: 1; justify-content: center; }
+  .s-arch .box {
+    background: #fff; border: 1px solid rgba(10,10,15,0.10);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: var(--font-body); font-size: 13px; line-height: 1.4;
+    color: #0A0A0F;
+  }
+  .s-arch .box b { display: block; font-weight: 800; font-size: 14px; margin-bottom: 2px; color: #0A0A0F; }
+  .s-arch .box .meta { font-family: var(--font-mono); font-size: 11px; color: #71758A; margin-top: 4px; letter-spacing: 0.04em; }
+  .s-arch .box.dark { background: #0A0A0F; color: #fff; border: 0; }
+  .s-arch .box.dark .meta { color: var(--asc-mint); }
+  .s-arch .box.mint { background: var(--asc-mint); color: #0A0A0F; border: 0; }
+  .s-arch .center-canvas { position: relative; }
+  .s-arch .core {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: stretch; justify-content: center; gap: 12px;
+  }
+  .s-arch .lane {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+  }
+  .s-arch .lane-label {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.12em; color: #71758A; text-transform: uppercase;
+    padding-left: 4px; margin-top: 4px;
+  }
+  .s-arch .arrow-svg {
+    position: absolute; inset: 0; pointer-events: none;
+  }
+  .s-arch .footer-strip {
+    margin-top: 18px; padding: 14px 24px;
+    background: #fff; border: 1px solid rgba(10,10,15,0.10);
+    border-radius: 6px;
+    display: flex; gap: 28px; align-items: center;
+    font-family: var(--font-body); font-size: 13px;
+    color: #4A4D5F;
+  }
+  .s-arch .footer-strip .lbl {
+    font-weight: 800; color: var(--asc-mint-900); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    padding-right: 18px; border-right: 1px solid rgba(10,10,15,0.10);
+  }
+  .s-arch .footer-strip .item { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: #0A0A0F; }
+  .s-arch .footer-strip .item::before { content:"■"; color: var(--asc-mint); font-size: 9px; }
+
+  /* ════════════════════════════════════════════════════════════════
+     05 — PERSONA / USER STORY
+     Use for: introducing a target user with their problem & desire
+     ════════════════════════════════════════════════════════════════ */
+  .s-persona { display: grid; grid-template-columns: 1fr 1.2fr; gap: 64px; padding: var(--pad); align-items: stretch; }
+  .s-persona .col-l { display: flex; flex-direction: column; justify-content: center; }
+  .s-persona .col-r { display: flex; flex-direction: column; justify-content: center; }
+  .s-persona .avatar-wrap {
+    position: relative;
+    width: 240px; height: 240px;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 32px;
+    border: 4px solid var(--asc-mint);
+  }
+  .s-persona .avatar-wrap .photo {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, var(--asc-mint-900) 0%, #0A0A0F 100%);
+    display: grid; place-items: center;
+    color: var(--asc-mint);
+    font-family: var(--font-display); font-weight: 900; font-size: 96px;
+  }
+  .s-persona .avatar-wrap .stamp {
+    position: absolute; bottom: 6px; right: 6px;
+    background: #0A0A0F; color: var(--asc-mint);
+    width: 56px; height: 56px; border-radius: 999px;
+    display: grid; place-items: center;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em; line-height: 1; text-align: center;
+  }
+  .s-persona h2 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 64px; line-height: 1.0; letter-spacing: -0.02em;
+    margin: 0 0 12px;
+  }
+  .s-persona h2 .role { color: var(--asc-mint-900); }
+  .s-persona .role-tag {
+    font-family: var(--font-mono); font-size: 14px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: #71758A; margin-bottom: 24px;
+  }
+  .s-persona .pain {
+    background: #F5F4F7; border-radius: 8px; padding: 24px 28px;
+    border-left: 4px solid var(--asc-magenta);
+    font-family: var(--font-body); font-size: 18px; line-height: 1.55;
+    color: #0A0A0F;
+    margin-bottom: 18px;
+  }
+  .s-persona .wish {
+    background: #F5F4F7; border-radius: 8px; padding: 24px 28px;
+    border-left: 4px solid var(--asc-mint);
+    font-family: var(--font-body); font-size: 18px; line-height: 1.55;
+    color: #0A0A0F; font-style: italic;
+  }
+  .s-persona .wish b { font-style: normal; font-weight: 800; color: var(--asc-mint-900); }
+  .s-persona .approach {
+    margin-top: 28px;
+    padding: 24px 28px;
+    background: #0A0A0F; color: #fff; border-radius: 8px;
+  }
+  .s-persona .approach .lbl {
+    font-family: var(--font-body); font-weight: 800; font-size: 12px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--asc-mint); margin-bottom: 14px;
+  }
+  .s-persona .approach .row {
+    display: flex; gap: 16px; padding: 12px 0;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .s-persona .approach .row:first-of-type { border-top: 0; padding-top: 4px; }
+  .s-persona .approach .row .key {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 16px; color: var(--asc-mint);
+    min-width: 130px;
+  }
+  .s-persona .approach .row .val {
+    font-family: var(--font-body); font-size: 15px; color: #E8E6EC; line-height: 1.45;
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     06 — SCOPING MATRIX (multi-row × Objectives / Focus / Value-Add)
+     Use for: engagement scoping, capability maps
+     ════════════════════════════════════════════════════════════════ */
+  .s-scoping h2 { font-family: var(--font-display); font-weight: 900; font-size: 52px; letter-spacing: -0.02em; line-height: 1.0; margin: 0 0 32px; max-width: 1600px; }
+  .s-scoping .table { display: grid; grid-template-columns: 220px repeat(3, 1fr); gap: 0; flex: 1; min-height: 0; }
+  .s-scoping .hcell {
+    padding: 14px 20px;
+    background: #0A0A0F; color: var(--asc-mint);
+    font-family: var(--font-body); font-weight: 800; font-size: 12px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .s-scoping .hcell.row { background: transparent; color: transparent; }
+  .s-scoping .cell {
+    padding: 22px 20px;
+    background: #F5F4F7;
+    font-family: var(--font-body); font-size: 14px; line-height: 1.5;
+    color: #4A4D5F;
+    border-top: 1px solid #fff; border-left: 1px solid #fff;
+  }
+  .s-scoping .cell.lead {
+    background: var(--asc-mint-900); color: #fff;
+    display: flex; flex-direction: column; gap: 6px;
+    border-left: 0;
+  }
+  .s-scoping .cell.lead .num {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
+    color: var(--asc-mint); margin-bottom: 4px;
+  }
+  .s-scoping .cell.lead .name {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 22px; line-height: 1.05; letter-spacing: -0.005em;
+  }
+  .s-scoping .cell .obj {
+    font-family: var(--font-body); font-weight: 700; color: #0A0A0F; font-size: 14px; margin-bottom: 6px;
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     07 — SERVICES SUITE  (offerings menu + partners + value-props)
+     ════════════════════════════════════════════════════════════════ */
+  .s-services h2 { font-family: var(--font-display); font-weight: 900; font-size: 56px; letter-spacing: -0.02em; line-height: 1.0; margin: 0 0 12px; }
+  .s-services .sub { font-family: var(--font-body); font-size: 18px; color: #71758A; line-height: 1.5; margin-bottom: 28px; max-width: 1300px; }
+  .s-services .layout { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; flex: 1; min-height: 0; }
+  .s-services .menu { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 14px; }
+  .s-services .card {
+    background: #F5F4F7; border-radius: 8px; padding: 22px 24px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .s-services .card.dark { background: #0A0A0F; color: #fff; }
+  .s-services .card h3 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 22px; line-height: 1.05; letter-spacing: -0.005em;
+    margin: 0;
+  }
+  .s-services .card .lines { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+  .s-services .card .lines span {
+    font-family: var(--font-body); font-size: 13px; line-height: 1.45; color: #4A4D5F;
+  }
+  .s-services .card.dark .lines span { color: #E8E6EC; }
+  .s-services .card .lines span::before { content: "→ "; color: var(--asc-mint-900); font-weight: 900; }
+  .s-services .card.dark .lines span::before { color: var(--asc-mint); }
+  .s-services .props {
+    background: #0A0A0F; color: #fff; border-radius: 8px;
+    padding: 24px 28px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .s-services .props .ph {
+    font-family: var(--font-body); font-weight: 800; font-size: 12px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--asc-mint);
+  }
+  .s-services .props .item {
+    padding: 12px 0;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .s-services .props .item:first-of-type { border-top: 0; padding-top: 6px; }
+  .s-services .props .item b {
+    display: block;
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 16px; color: var(--asc-mint); margin-bottom: 4px; letter-spacing: -0.005em;
+  }
+  .s-services .props .item .desc {
+    font-family: var(--font-body); font-size: 13px; line-height: 1.45; color: #E8E6EC;
+  }
+  .s-services .partners {
+    margin-top: 24px;
+    padding: 18px 24px;
+    background: #fff; border: 1px solid rgba(10,10,15,0.10);
+    border-radius: 999px;
+    display: flex; align-items: center; gap: 28px;
+  }
+  .s-services .partners .lbl {
+    font-family: var(--font-body); font-weight: 800; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--asc-mint-900);
+    padding-right: 20px; border-right: 1px solid rgba(10,10,15,0.10);
+  }
+  .s-services .partners .pchip {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 15px; color: #0A0A0F; letter-spacing: -0.005em;
+  }
+  .s-services .stats {
+    display: flex; gap: 36px; margin-top: 22px;
+  }
+  .s-services .stats .s {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 36px; color: var(--asc-mint-900); line-height: 1; letter-spacing: -0.01em;
+  }
+  .s-services .stats .l {
+    font-family: var(--font-body); font-size: 13px; color: #71758A;
+    text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-top: 4px;
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     08 — TEAM / GOVERNANCE
+     Use for: project staffing, communication cadence
+     ════════════════════════════════════════════════════════════════ */
+  .s-team h2 { font-family: var(--font-display); font-weight: 900; font-size: 52px; letter-spacing: -0.02em; line-height: 1.0; margin: 0 0 12px; }
+  .s-team .sub { font-family: var(--font-body); font-size: 17px; color: #71758A; line-height: 1.5; max-width: 1400px; margin-bottom: 28px; }
+  .s-team .layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; flex: 1; min-height: 0; }
+  .s-team .leftcol { display: flex; flex-direction: column; gap: 16px; }
+  .s-team .leader-row {
+    background: #0A0A0F; color: #fff; border-radius: 8px; padding: 22px 28px;
+    display: grid; grid-template-columns: 220px 1fr 1fr; gap: 20px; align-items: center;
+  }
+  .s-team .leader-row .lbl {
+    font-family: var(--font-body); font-weight: 800; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--asc-mint);
+  }
+  .s-team .leader-row .pcell { display: flex; align-items: center; gap: 14px; }
+  .s-team .leader-row .ava {
+    width: 44px; height: 44px; border-radius: 999px;
+    background: var(--asc-mint); color: #0A0A0F;
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 900; font-size: 16px;
+  }
+  .s-team .leader-row .role { font-family: var(--font-mono); font-size: 11px; color: var(--asc-mint); letter-spacing: 0.10em; }
+  .s-team .leader-row .name { font-family: var(--font-display); font-weight: 900; font-size: 18px; color: #fff; }
+  .s-team .delivery-grid {
+    background: #F5F4F7; border-radius: 8px; padding: 28px;
+    flex: 1;
+  }
+  .s-team .delivery-grid .gh {
+    font-family: var(--font-body); font-weight: 800; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--asc-mint-900); margin-bottom: 14px;
+  }
+  .s-team .delivery-grid .ppl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 18px; }
+  .s-team .delivery-grid .p {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .s-team .delivery-grid .p .ava {
+    width: 32px; height: 32px; border-radius: 999px;
+    background: #fff; border: 2px solid var(--asc-mint);
+    color: var(--asc-mint-900);
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 900; font-size: 12px;
+  }
+  .s-team .delivery-grid .p .meta { line-height: 1.2; }
+  .s-team .delivery-grid .p .role { font-family: var(--font-mono); font-size: 10px; color: #71758A; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
+  .s-team .delivery-grid .p .name { font-family: var(--font-body); font-weight: 700; font-size: 14px; color: #0A0A0F; }
+  .s-team .cadence { display: flex; flex-direction: column; gap: 14px; }
+  .s-team .cadence h3 {
+    font-family: var(--font-body); font-weight: 800; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--asc-mint-900); margin: 0 0 8px;
+  }
+  .s-team .cadence .row {
+    background: #F5F4F7; border-radius: 8px; padding: 18px 22px;
+    display: grid; grid-template-columns: 60px 1fr; gap: 18px; align-items: center;
+  }
+  .s-team .cadence .freq {
+    width: 56px; height: 56px; border-radius: 6px;
+    background: var(--asc-mint); color: #0A0A0F;
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 900; font-size: 14px;
+    text-align: center; line-height: 1.05;
+  }
+  .s-team .cadence .what b {
+    display: block;
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 17px; color: #0A0A0F; letter-spacing: -0.005em; margin-bottom: 2px;
+  }
+  .s-team .cadence .what span {
+    font-family: var(--font-body); font-size: 13px; line-height: 1.4; color: #4A4D5F;
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     09 — ROADMAP (5-phase MVP / phased delivery)
+     ════════════════════════════════════════════════════════════════ */
+  .s-roadmap h2 { font-family: var(--font-display); font-weight: 900; font-size: 56px; letter-spacing: -0.02em; line-height: 1.0; margin: 0 0 12px; }
+  .s-roadmap .sub { font-family: var(--font-body); font-size: 17px; color: #71758A; line-height: 1.5; margin-bottom: 32px; }
+  .s-roadmap .timeline {
+    flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+    min-height: 0;
+  }
+  .s-roadmap .phase {
+    background: #F5F4F7; border-radius: 8px; padding: 24px 22px;
+    display: flex; flex-direction: column; gap: 12px;
+    position: relative;
+  }
+  .s-roadmap .phase .ribbon {
+    position: absolute; top: -12px; left: 24px;
+    background: #0A0A0F; color: var(--asc-mint);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
+    padding: 6px 12px; border-radius: 4px;
+    text-transform: uppercase; font-weight: 700;
+    white-space: nowrap;
+  }
+  .s-roadmap .phase .mvp {
+    margin-top: 8px;
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 20px; line-height: 1.1; letter-spacing: -0.005em; color: #0A0A0F;
+  }
+  .s-roadmap .phase .dur {
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--asc-mint-900); letter-spacing: 0.10em;
+  }
+  .s-roadmap .phase .delivs {
+    flex: 1;
+    display: flex; flex-direction: column; gap: 8px;
+    margin-top: 4px;
+  }
+  .s-roadmap .phase .delivs .d {
+    font-family: var(--font-body); font-size: 13px; line-height: 1.45; color: #4A4D5F;
+    padding-left: 14px; position: relative;
+  }
+  .s-roadmap .phase .delivs .d::before {
+    content: ""; position: absolute; left: 0; top: 7px; width: 6px; height: 6px;
+    background: var(--asc-mint); border-radius: 50%;
+  }
+  .s-roadmap .phase .delivs .d b { color: #0A0A0F; font-weight: 800; }
+  .s-roadmap .phase .checkpoint {
+    margin-top: 8px; padding: 8px 12px;
+    background: #fff; border: 1px dashed var(--asc-orange);
+    border-radius: 4px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--asc-orange); letter-spacing: 0.06em; font-weight: 700; text-transform: uppercase;
+  }
+  .s-roadmap .phase.feature { background: #0A0A0F; color: #fff; }
+  .s-roadmap .phase.feature .mvp { color: #fff; }
+  .s-roadmap .phase.feature .dur { color: var(--asc-mint); }
+  .s-roadmap .phase.feature .delivs .d { color: #AFAAB9; }
+  .s-roadmap .phase.feature .delivs .d b { color: #fff; }
+  .s-roadmap .footer-note {
+    margin-top: 18px;
+    font-family: var(--font-mono); font-size: 12px; color: #71758A; letter-spacing: 0.06em;
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     10 — USE CASE (case overview + benefits sidebar)
+     ════════════════════════════════════════════════════════════════ */
+  .s-usecase { display: grid; grid-template-columns: 1.5fr 1fr; gap: 36px; padding: var(--pad); }
+  .s-usecase .left { display: flex; flex-direction: column; }
+  .s-usecase .eyebrow { margin: 0 0 14px; }
+  .s-usecase h2 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 56px; line-height: 1.0; letter-spacing: -0.02em; margin: 0 0 24px;
+  }
+  .s-usecase .lede {
+    font-family: var(--font-body); font-size: 19px; line-height: 1.55; color: #4A4D5F;
+    margin: 0 0 24px;
+  }
+  .s-usecase .modules {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    margin-bottom: 24px;
+  }
+  .s-usecase .modules .m {
+    background: #F5F4F7; border-radius: 8px; padding: 18px 18px;
+    border-top: 3px solid var(--asc-mint);
+  }
+  .s-usecase .modules .m .mname {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 15px; line-height: 1.1; letter-spacing: -0.005em; color: #0A0A0F; margin-bottom: 8px;
+  }
+  .s-usecase .modules .m .mdesc {
+    font-family: var(--font-body); font-size: 12px; line-height: 1.45; color: #4A4D5F;
+  }
+  .s-usecase .flow {
+    background: #fff; border: 1px solid rgba(10,10,15,0.10); border-radius: 8px;
+    padding: 22px 24px;
+    flex: 1;
+  }
+  .s-usecase .flow .ph {
+    font-family: var(--font-body); font-weight: 800; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--asc-mint-900); margin-bottom: 14px;
+  }
+  .s-usecase .flow svg { width: 100%; height: auto; max-height: 200px; display: block; }
+  .s-usecase .right {
+    background: #0A0A0F; color: #fff; border-radius: 8px;
+    padding: 36px 32px;
+    display: flex; flex-direction: column;
+  }
+  .s-usecase .right .ph {
+    font-family: var(--font-body); font-weight: 800; font-size: 12px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--asc-mint); margin-bottom: 28px;
+  }
+  .s-usecase .right h3 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 36px; line-height: 1.0; letter-spacing: -0.01em; color: #fff;
+    margin: 0 0 28px;
+  }
+  .s-usecase .benefits { display: flex; flex-direction: column; gap: 18px; }
+  .s-usecase .benefits .b { display: flex; gap: 14px; align-items: flex-start; }
+  .s-usecase .benefits .b .mk {
+    flex-shrink: 0; width: 28px; height: 28px; border-radius: 999px;
+    background: var(--asc-mint); color: #0A0A0F;
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 900; font-size: 13px;
+    margin-top: 2px;
+  }
+  .s-usecase .benefits .b .txt {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.5; color: #E8E6EC;
+  }
+  .s-usecase .benefits .b .txt b {
+    display: block;
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 17px; color: var(--asc-mint); margin-bottom: 4px; letter-spacing: -0.005em;
+  }
+
+</style>
+</head>
+<body>
+
+<style>deck-stage:not(:defined){visibility:hidden}</style>
+<deck-stage>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       01 — QUAD STATS WITH SOURCES
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-quadstats" data-screen-label="01 Quad Stats">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">Market Potential · Gen AI</div>
+    <h2 class="h2-major">How Gen AI is changing<br>the business ecosystem.</h2>
+
+    <div class="grid">
+      <div class="tile">
+        <div class="cat">Market potential</div>
+        <div class="big">$967<span style="font-size:0.55em">B</span></div>
+        <div class="body">Generative AI market projected by <b>2032</b>, up from $43.87B in 2023.</div>
+      </div>
+      <div class="tile purple">
+        <div class="cat">Industry growth</div>
+        <div class="big"><span class="accent">40<span style="font-size:0.5em">%</span></span></div>
+        <div class="body">CAGR over the next 10 years for the Gen AI industry.</div>
+      </div>
+      <div class="tile orange">
+        <div class="cat">Economic impact</div>
+        <div class="big"><span class="accent">+7<span style="font-size:0.5em">%</span></span></div>
+        <div class="body">Lift in global GDP (~$7T) and +1.5pp productivity growth over a decade.</div>
+      </div>
+      <div class="tile feature">
+        <div class="cat">Investments</div>
+        <div class="big">$21.3<span style="font-size:0.5em">B</span></div>
+        <div class="body">Global VC/PE investment in Gen AI for 2023 alone.</div>
+      </div>
+    </div>
+
+    <div class="sources">
+      <div class="lbl">Sources</div>
+      <div><span class="src">Bloomberg</span> · <span class="src">Goldman Sachs</span> · <span class="src">IBM</span> · <span class="src">Fortune Business</span> · <span class="src">EY</span></div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">01 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       02 — HORIZONTAL JOURNEY (6 STAGES)
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-journey" data-screen-label="02 Journey">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">How enterprises productionize Gen AI</div>
+    <h2 class="h2-major">From awareness to scale —<br>in six structured stages.</h2>
+
+    <div style="position: relative;">
+      <div class="rail"></div>
+      <div class="stages">
+        <div class="stage">
+          <div class="pin">1</div>
+          <div class="pname">Awareness &amp;<br>Education</div>
+          <div class="substeps">
+            <span>Workshops &amp; trainings</span>
+            <span>Gen AI strategy creation</span>
+            <span>Objectives visioning</span>
+          </div>
+          <div class="out">Workforce empowered with practical Gen AI knowledge.</div>
+        </div>
+        <div class="stage">
+          <div class="pin">2</div>
+          <div class="pname">Infrastructure<br>Evaluation</div>
+          <div class="substeps">
+            <span>Data readiness</span>
+            <span>System compatibility</span>
+            <span>Technical guardrails</span>
+          </div>
+          <div class="out">Clear readiness assessment and requirements.</div>
+        </div>
+        <div class="stage">
+          <div class="pin">3</div>
+          <div class="pname">Use-Case<br>Identification</div>
+          <div class="substeps">
+            <span>Business impact</span>
+            <span>Prioritization</span>
+            <span>ROI hypotheses</span>
+          </div>
+          <div class="out">Prioritized opportunities with measurable impact.</div>
+        </div>
+        <div class="stage">
+          <div class="pin">4</div>
+          <div class="pname">Gen AI Strategy<br>Creation</div>
+          <div class="substeps">
+            <span>Roadmap development</span>
+            <span>Operating-model design</span>
+            <span>Vendor selection</span>
+          </div>
+          <div class="out">Actionable implementation roadmap with defined goals.</div>
+        </div>
+        <div class="stage">
+          <div class="pin">5</div>
+          <div class="pname">Pilot &amp; ROI<br>Evaluation</div>
+          <div class="substeps">
+            <span>POC implementation</span>
+            <span>Performance metrics</span>
+            <span>ROI analysis</span>
+          </div>
+          <div class="out">Validated business case with proven results.</div>
+        </div>
+        <div class="stage">
+          <div class="pin">6</div>
+          <div class="pname">Production<br>&amp; Scale</div>
+          <div class="substeps">
+            <span>Solution design</span>
+            <span>Ecosystem integration</span>
+            <span>Governance &amp; compliance</span>
+          </div>
+          <div class="out">Secure, compliant, scalable Gen AI in production.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-strip">
+      <div class="lbl">Where we partner</div>
+      <div>Discovery · Workshops · Build · Hardening · Scale-up — <b style="color:#0A0A0F">we walk every stage with you, never just hand off a deck.</b></div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">02 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       03 — PLAYBOOK (5-column FRAMEWORK)
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-playbook" data-screen-label="03 Playbook">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">Enterprise-grade Gen AI · The Playbook</div>
+    <h2 class="h2-major">What. Why. How. Build. Scale.</h2>
+    <div class="sub">A five-step framework we apply on every engagement to keep Gen AI projects grounded in business outcomes — not novelty.</div>
+
+    <div class="cols">
+      <div class="col">
+        <div class="hdr"><div class="ico">W</div><div class="name">What</div></div>
+        <div class="body">
+          <div class="item"><b>Well-defined use-case</b> grounded in a real business problem.</div>
+          <div class="item">Articulate desired outcomes of the Gen AI solution.</div>
+          <div class="item">Identify quantifiable metrics from day one.</div>
+          <div class="item">Consider existing workflows — don't bolt on, integrate.</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="hdr"><div class="ico">Y</div><div class="name">Why</div></div>
+        <div class="body">
+          <div class="item"><b>Data &amp; domain expertise</b> — the unfair advantage.</div>
+          <div class="item">Establish a robust data pipeline before any model.</div>
+          <div class="item">Ensure data quality &amp; lineage are auditable.</div>
+          <div class="item">Domain experts collaborate on real-world challenges.</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="hdr"><div class="ico">H</div><div class="name">How</div></div>
+        <div class="body">
+          <div class="item"><b>Prioritize evals</b> before LLMs, agents, or frameworks.</div>
+          <div class="item">Build a comprehensive evaluation framework.</div>
+          <div class="item">Map every eval back to a business outcome.</div>
+          <div class="item">SLMs for objective tests, LLMs for qualitative.</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="hdr"><div class="ico">B</div><div class="name">Build</div></div>
+        <div class="body">
+          <div class="item"><b>SDLC considerations for Gen AI</b> — same rigor, new ceremonies.</div>
+          <div class="item">Agile, versioned, observable from day one.</div>
+          <div class="item">Transparency in decision making.</div>
+          <div class="item">Security &amp; privacy designed in, not retrofit.</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="hdr"><div class="ico">S</div><div class="name">Scale</div></div>
+        <div class="body">
+          <div class="item"><b>Gen-AI-experienced talent</b> — not a generic data team.</div>
+          <div class="item">Gen AI certified developers.</div>
+          <div class="item">Experienced Gen AI project managers.</div>
+          <div class="item">Centres of Excellence for knowledge sharing.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">03 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       04 — REFERENCE ARCHITECTURE
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-arch" data-screen-label="04 Reference Architecture">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">Reference architecture · AWS</div>
+    <h2 class="h2-major">Gen BI on AWS — natural-language<br>queries over enterprise data.</h2>
+    <div class="sub">Bedrock for generation, Athena for execution, FAISS for retrieval. Every answer is traceable to source.</div>
+
+    <div class="canvas">
+      <!-- Left column: data sources -->
+      <div class="col">
+        <div class="col-head">Data Sources</div>
+        <div class="stack">
+          <div class="box"><b>Parquet · S3</b><div class="meta">data lake</div></div>
+          <div class="box"><b>RDS</b><div class="meta">operational store</div></div>
+          <div class="box"><b>Aurora DB</b><div class="meta">transactional</div></div>
+          <div class="box"><b>Glue Crawler</b><div class="meta">catalog / metadata</div></div>
+        </div>
+      </div>
+
+      <!-- Middle: agent pipeline -->
+      <div class="col center-canvas">
+        <div class="col-head">Gen BI Agent Pipeline</div>
+        <div class="lane">
+          <div class="box dark"><b>Input</b><div class="meta">NL query + context</div></div>
+          <div class="box mint"><b>Bedrock · Claude</b><div class="meta">SQL generation</div></div>
+          <div class="box dark"><b>Athena</b><div class="meta">execute SQL</div></div>
+        </div>
+        <div class="lane-label">— Query path</div>
+        <div class="lane">
+          <div class="box"><b>FAISS · Schema</b><div class="meta">titan embeddings</div></div>
+          <div class="box"><b>FAISS · Domain KB</b><div class="meta">business rules</div></div>
+          <div class="box"><b>FAISS · Feedback</b><div class="meta">RLHF signals</div></div>
+        </div>
+        <div class="lane-label">— Retrieval layer (vector stores)</div>
+        <div class="lane">
+          <div class="box dark"><b>Rectify SQL</b><div class="meta">self-correction</div></div>
+          <div class="box mint"><b>Bedrock · Claude</b><div class="meta">NLP response + graph</div></div>
+          <div class="box dark"><b>Chat history</b><div class="meta">follow-ups</div></div>
+        </div>
+        <div class="lane-label">— Response + follow-up loop</div>
+      </div>
+
+      <!-- Right: outputs -->
+      <div class="col">
+        <div class="col-head">Outputs</div>
+        <div class="stack">
+          <div class="box"><b>NLP Response</b><div class="meta">cited to source</div></div>
+          <div class="box"><b>Generated graph</b><div class="meta">when applicable</div></div>
+          <div class="box"><b>Modified question</b><div class="meta">guided refinement</div></div>
+          <div class="box"><b>User feedback</b><div class="meta">positive / negative</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-strip">
+      <div class="lbl">Non-negotiables</div>
+      <div class="item">Traceable to source</div>
+      <div class="item">Self-correcting SQL</div>
+      <div class="item">VPC-deployed</div>
+      <div class="item">Feedback loop closed</div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">04 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       05 — PERSONA / USER STORY
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-persona" data-screen-label="05 Persona">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+
+    <div class="col-l">
+      <div class="avatar-wrap">
+        <div class="photo">R</div>
+        <div class="stamp">USER<br>PERSONA</div>
+      </div>
+      <h2><span class="role">Rachel</span><br>is a nurse.</h2>
+      <div class="role-tag">/ Care21 · Frontline clinical staff</div>
+      <div class="pain">
+        She has to read and synthesize multiple patient medical records — doctor's prescriptions, previous test reports, clinical notes — before every appointment and procedure. <b style="color:var(--asc-magenta)">It eats hours every shift.</b>
+      </div>
+      <div class="wish">
+        "I wish there was a way to get a <b>comprehensive healthcare summary</b> of each patient — at any point in time, before appointments, procedures, or handover."
+      </div>
+    </div>
+
+    <div class="col-r">
+      <div class="eyebrow">Solution approach</div>
+      <h2 style="font-size: 44px; line-height: 1.05;">Comprehensive Patient<br>Healthcare Summary.</h2>
+      <div style="font-family: var(--font-body); font-size: 17px; line-height: 1.55; color: #4A4D5F; margin-bottom: 24px;">
+        An AI agent that reads across Care21 records — medical history, prescriptions, notes — and produces a synthesized summary for the clinician on demand.
+      </div>
+
+      <div class="approach">
+        <div class="lbl">/ Two-layer approach</div>
+        <div class="row">
+          <div class="key">AI Layer</div>
+          <div class="val">NLP + LLMs synthesize relevant data into a clinician-ready summary, with citations back to source records.</div>
+        </div>
+        <div class="row">
+          <div class="key">Data Engineering</div>
+          <div class="val">Fetch from multiple records in the Data Layer, aggregate into a staging layer optimized for the summary agent.</div>
+        </div>
+        <div class="row">
+          <div class="key">Data needed</div>
+          <div class="val">Care21 schemas, sample anonymized patient records, and clinical workflow insights.</div>
+        </div>
+        <div class="row">
+          <div class="key">Deployment</div>
+          <div class="val">Azure-resident, hospital-controlled. HIPAA-aware, audit-trailed by default.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">05 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       06 — SCOPING MATRIX
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-scoping" data-screen-label="06 Scoping Matrix">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">Engagement design · Gen AI Readiness Assessment</div>
+    <h2 class="h2-major">Four focus areas. One assessment.<br>Three deliverables per area.</h2>
+
+    <div class="table">
+      <div class="hcell row"></div>
+      <div class="hcell">Objective</div>
+      <div class="hcell">Key focus areas</div>
+      <div class="hcell">Our value adds</div>
+
+      <div class="cell lead">
+        <div class="num">01</div>
+        <div class="name">Gap<br>Analysis</div>
+      </div>
+      <div class="cell">
+        <div class="obj">Identify gaps in current AI capabilities, adoption, and infrastructure.</div>
+      </div>
+      <div class="cell">Data readiness, current AI initiatives, operational bottlenecks, model inventory.</div>
+      <div class="cell">Expertise in analyzing AI readiness, deep knowledge of sector-specific challenges, ability to uncover the gaps that aren't in slideware.</div>
+
+      <div class="cell lead">
+        <div class="num">02</div>
+        <div class="name">Tech Landscape<br>Assessment</div>
+      </div>
+      <div class="cell">
+        <div class="obj">Assess current technology landscape and explore new technologies to enhance competitiveness.</div>
+      </div>
+      <div class="cell">Generative AI tools, infrastructure, integration gaps, potential technology investments.</div>
+      <div class="cell">Extensive partnerships with AI technology providers and proven experience building production solutions tailored to telecom and BFSI.</div>
+
+      <div class="cell lead">
+        <div class="num">03</div>
+        <div class="name">Talent<br>Assessment</div>
+      </div>
+      <div class="cell">
+        <div class="obj">Assess workforce readiness and ability to adapt to AI technologies.</div>
+      </div>
+      <div class="cell">AI skills gap, upskilling needs, talent acquisition strategy, training programs.</div>
+      <div class="cell">Proven frameworks to identify skill gaps and recommend talent development strategies. Expertise structuring AI training and upskilling programs.</div>
+
+      <div class="cell lead">
+        <div class="num">04</div>
+        <div class="name">Roadmap &amp;<br>Strategy</div>
+      </div>
+      <div class="cell">
+        <div class="obj">Define a clear roadmap for AI growth, including partner strategies.</div>
+      </div>
+      <div class="cell">Short / medium / long-term AI goals, partner strategies, implementation steps.</div>
+      <div class="cell">Experience crafting AI strategies aligned with business goals — and the discipline to deliver a roadmap your CFO will fund.</div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">06 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       07 — SERVICES SUITE
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-services" data-screen-label="07 Services Suite">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">AI Services Suite</div>
+    <h2 class="h2-major">Four practices. One delivery engine.</h2>
+    <div class="sub">Each practice maps to a buying motion — advisory, build, integrate, operate. Same delivery model, AAVA™ underneath.</div>
+
+    <div class="layout">
+      <div class="menu">
+        <div class="card dark">
+          <h3>AI Consulting<br>&amp; Engineering</h3>
+          <div class="lines">
+            <span>AI Roadmap Development</span>
+            <span>AI Ecosystem Integration</span>
+            <span>Gen AI Solutions</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Business Process<br>Reimagining</h3>
+          <div class="lines">
+            <span>Process optimization</span>
+            <span>LLM + SLM API led applications</span>
+            <span>Robotic process automation</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3>AI-Assisted<br>Software Engineering</h3>
+          <div class="lines">
+            <span>Agile story creation</span>
+            <span>Test case generator</span>
+            <span>Code assistance</span>
+          </div>
+        </div>
+        <div class="card dark">
+          <h3>AI-Driven Talent<br>Solutioning</h3>
+          <div class="lines">
+            <span>AI-enhanced talent acquisition</span>
+            <span>Next-gen tech-talent evolution</span>
+            <span>Gen AI skilled workforce</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="props">
+        <div class="ph">Value propositions</div>
+        <div class="item">
+          <b>Tailored AI for Business Growth</b>
+          <div class="desc">Custom AI strategies with gap analysis and risk assessment.</div>
+        </div>
+        <div class="item">
+          <b>Seamless Integration &amp; Data Security</b>
+          <div class="desc">AI solutions integrate smoothly with secure data governance.</div>
+        </div>
+        <div class="item">
+          <b>Faster, Smarter Development</b>
+          <div class="desc">AI-driven coding, auto-completion, test automation.</div>
+        </div>
+        <div class="item">
+          <b>AI-Optimized Talent &amp; Learning</b>
+          <div class="desc">AI-based hiring, skill analysis, personalized learning paths.</div>
+        </div>
+        <div class="item">
+          <b>Operational Efficiency</b>
+          <div class="desc">AI-enhanced user stories, test coverage, process automation.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap: 48px; margin-top: 22px; align-items: center;">
+      <div class="stats" style="margin: 0;">
+        <div>
+          <div class="s">25<sup style="font-size:0.5em">+</sup></div>
+          <div class="l">Solutions Developed</div>
+        </div>
+        <div>
+          <div class="s">1,100<sup style="font-size:0.5em">+</sup></div>
+          <div class="l">Gen AI Certified Pros</div>
+        </div>
+      </div>
+      <div class="partners" style="margin: 0; flex: 1;">
+        <div class="lbl">Our partners</div>
+        <span class="pchip">Salesforce Einstein</span>
+        <span class="pchip">·</span>
+        <span class="pchip">Amazon Bedrock</span>
+        <span class="pchip">·</span>
+        <span class="pchip">Microsoft Azure</span>
+        <span class="pchip">·</span>
+        <span class="pchip">Anthropic Claude</span>
+      </div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">07 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       08 — TEAM / GOVERNANCE
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-team" data-screen-label="08 Team & Governance">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">Project Governance &amp; Communication Structure</div>
+    <h2 class="h2-major">A team built for close<br>collaboration, end-to-end.</h2>
+    <div class="sub">From governance and controls, through design standards, to seamless implementation and warranty — one team, one cadence.</div>
+
+    <div class="layout">
+      <div class="leftcol">
+        <div class="leader-row">
+          <div class="lbl">/ Delivery Leadership</div>
+          <div class="pcell">
+            <div class="ava">SR</div>
+            <div>
+              <div class="role">Program Manager</div>
+              <div class="name">Srinidhi Ramanujam</div>
+            </div>
+          </div>
+          <div class="pcell">
+            <div class="ava">SD</div>
+            <div>
+              <div class="role">Project Lead</div>
+              <div class="name">Suprotim Dutta</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="delivery-grid">
+          <div class="gh">/ Delivery team</div>
+          <div class="ppl">
+            <div class="p">
+              <div class="ava">RH</div>
+              <div class="meta">
+                <div class="role">Lead Data Scientist</div>
+                <div class="name">Roopa Hegde</div>
+              </div>
+            </div>
+            <div class="p">
+              <div class="ava">VP</div>
+              <div class="meta">
+                <div class="role">Senior Data Scientist</div>
+                <div class="name">Vishwas Poojary</div>
+              </div>
+            </div>
+            <div class="p">
+              <div class="ava">BN</div>
+              <div class="meta">
+                <div class="role">Azure Architect</div>
+                <div class="name">Bukke Naik</div>
+              </div>
+            </div>
+            <div class="p">
+              <div class="ava">SS</div>
+              <div class="meta">
+                <div class="role">Data Scientist</div>
+                <div class="name">Samuel Simon</div>
+              </div>
+            </div>
+            <div class="p">
+              <div class="ava">NC</div>
+              <div class="meta">
+                <div class="role">Data Scientist</div>
+                <div class="name">Nischita CN</div>
+              </div>
+            </div>
+            <div class="p">
+              <div class="ava">MK</div>
+              <div class="meta">
+                <div class="role">Business Analyst</div>
+                <div class="name">Mukund Kaushal</div>
+              </div>
+            </div>
+            <div class="p">
+              <div class="ava">VK</div>
+              <div class="meta">
+                <div class="role">Domain SME</div>
+                <div class="name">Vibhanshu Katiyar</div>
+              </div>
+            </div>
+            <div class="p">
+              <div class="ava">RD</div>
+              <div class="meta">
+                <div class="role">UI / UX SME</div>
+                <div class="name">Rajat Dixit</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cadence">
+        <h3>/ Communication structure</h3>
+        <div class="row">
+          <div class="freq">DAILY</div>
+          <div class="what">
+            <b>Daily cadence call</b>
+            <span>Quick status updates, prioritization of tasks for the day, immediate concerns &amp; dependencies. Internal team + client stakeholders.</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="freq">WEEKLY</div>
+          <div class="what">
+            <b>Periodic updates call</b>
+            <span>Summary of completed tasks, updates on key deliverables, action items &amp; next week's priorities. Project leadership + client.</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="freq">DROP-<br>END</div>
+          <div class="what">
+            <b>Milestone updates call</b>
+            <span>Demo of completed functionalities, performance review of KPIs and timeline, client feedback. Full project team + client.</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="freq">AS<br>NEEDED</div>
+          <div class="what">
+            <b>Client queries / reviews</b>
+            <span>Ad-hoc working sessions with relevant team members and client stakeholders. Async-first with sync escalation.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">08 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       09 — ROADMAP (5-phase MVP / phased delivery)
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-roadmap" data-screen-label="09 Roadmap">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">Roadmap &amp; Timeline · Phase 2.0</div>
+    <h2 class="h2-major">Five MVPs. Five Go / No-Go gates.</h2>
+    <div class="sub">Agentic AI foundation, semi-automated mapping, self-learning, automation, production. Every MVP ships with a feedback alignment review.</div>
+
+    <div class="timeline">
+      <div class="phase">
+        <div class="ribbon">MVP 1</div>
+        <div class="dur">2 weeks</div>
+        <div class="mvp">Agentic AI<br>Foundation</div>
+        <div class="delivs">
+          <div class="d"><b>Manual pre-processing</b> — lightweight HITL interface</div>
+          <div class="d"><b>Mapping Agent</b> — parses files, dependent on pre-processing</div>
+          <div class="d">Simple orchestration workflow</div>
+          <div class="d"><b>Feedback capture</b> — store human guidance &amp; outcomes</div>
+        </div>
+        <div class="checkpoint">↳ Showcase: Agentic core engine</div>
+      </div>
+
+      <div class="phase">
+        <div class="ribbon">MVP 2</div>
+        <div class="dur">6 weeks</div>
+        <div class="mvp">Semi-Automated<br>Mapping</div>
+        <div class="delivs">
+          <div class="d"><b>Mapping Agent with confidence scoring</b> — requests intervention if low</div>
+          <div class="d"><b>Feedback loop</b> — store corrections; basic learning</div>
+          <div class="d"><b>SQL Generation Agent</b> — early-stage DDL/DML</div>
+          <div class="d"><b>Enhanced orchestration</b> — error handling &amp; retries</div>
+        </div>
+        <div class="checkpoint">↳ Showcase: Agent–human collab</div>
+      </div>
+
+      <div class="phase feature">
+        <div class="ribbon">MVP 3</div>
+        <div class="dur">8 weeks</div>
+        <div class="mvp">Self-Learning<br>&amp; Automation</div>
+        <div class="delivs">
+          <div class="d"><b>Automated Pre-processing Agent</b> — converts human steps to logic</div>
+          <div class="d"><b>Self-improving Mapping Agent</b> — retrains on corrections</div>
+          <div class="d"><b>Advanced Validation Agent</b> — automated checks + fallback</div>
+          <div class="d">Focus on scaling with less human intervention</div>
+        </div>
+        <div class="checkpoint" style="background:#1A1A22; color: var(--asc-mint); border-color: var(--asc-mint);">↳ Showcase: Self-correcting agents</div>
+      </div>
+
+      <div class="phase">
+        <div class="ribbon">MVP 4</div>
+        <div class="dur">6 weeks</div>
+        <div class="mvp">UAT<br>&amp; Handover</div>
+        <div class="delivs">
+          <div class="d"><b>Comprehensive UAT</b> — all business scenarios, edge cases</div>
+          <div class="d"><b>Documentation</b> — user guides, admin guides, SOPs</div>
+          <div class="d"><b>Handover workshops</b> — to client IT/ops teams</div>
+          <div class="d">Final testing &amp; compliance validation</div>
+        </div>
+        <div class="checkpoint">↳ Gate: Production-ready sign-off</div>
+      </div>
+
+      <div class="phase">
+        <div class="ribbon">MVP 5</div>
+        <div class="dur">6 weeks</div>
+        <div class="mvp">Production<br>Deployment</div>
+        <div class="delivs">
+          <div class="d"><b>Full production deployment</b> with monitoring</div>
+          <div class="d"><b>Operational runbooks</b> &amp; procedures</div>
+          <div class="d"><b>Performance dashboards</b> &amp; alerting</div>
+          <div class="d">Real-time business &amp; technical visibility</div>
+        </div>
+        <div class="checkpoint">↳ Go-live + warranty period</div>
+      </div>
+    </div>
+
+    <div class="footer-note">** UAT issues identified in any MVP roll into the next MVP — no scope is left behind.</div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">09 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       10 — USE CASE (description + benefits sidebar + flow)
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-usecase" data-screen-label="10 Use Case">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+
+    <div class="left">
+      <div class="eyebrow">Use case · Asset &amp; Wealth Management</div>
+      <h2 class="h2-major">Intelligent Portfolio<br>&amp; Risk Tracker.</h2>
+      <div class="lede">
+        Enables senior management to make decisions based on proactive risk monitoring of external developments — tracking portfolio news, extracting regulatory updates, and surfacing competitive threats in one conversational interface.
+      </div>
+
+      <div class="modules">
+        <div class="m">
+          <div class="mname">News Segregator Agent</div>
+          <div class="mdesc">Pulls structured feeds; classifies holdings, competitors, regulatory.</div>
+        </div>
+        <div class="m">
+          <div class="mname">Summarizing Agents</div>
+          <div class="mdesc">Three specialized agents produce concise summaries per category.</div>
+        </div>
+        <div class="m">
+          <div class="mname">Gen AI Chatbot</div>
+          <div class="mdesc">Interactive dashboard with time-frame, company, risk-type filters.</div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="ph">/ Data flow — at a glance</div>
+        <svg viewBox="0 0 760 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- Nodes -->
+          <g font-family="Nunito Sans, sans-serif" font-weight="800" font-size="11" fill="#0A0A0F">
+            <rect x="10" y="60" width="100" height="40" rx="4" fill="#F5F4F7" stroke="#AFAAB9"/>
+            <text x="60" y="84" text-anchor="middle">News sources</text>
+            <rect x="140" y="60" width="100" height="40" rx="4" fill="#F5F4F7" stroke="#AFAAB9"/>
+            <text x="190" y="84" text-anchor="middle">Segregator</text>
+            <rect x="280" y="20" width="100" height="36" rx="4" fill="#fff" stroke="#2CDCAA" stroke-width="1.5"/>
+            <text x="330" y="42" text-anchor="middle">Holdings</text>
+            <rect x="280" y="62" width="100" height="36" rx="4" fill="#fff" stroke="#2CDCAA" stroke-width="1.5"/>
+            <text x="330" y="84" text-anchor="middle">Competitors</text>
+            <rect x="280" y="104" width="100" height="36" rx="4" fill="#fff" stroke="#2CDCAA" stroke-width="1.5"/>
+            <text x="330" y="126" text-anchor="middle">Regulatory</text>
+            <rect x="410" y="60" width="100" height="40" rx="4" fill="#0A0A0F"/>
+            <text x="460" y="84" text-anchor="middle" fill="#2CDCAA">Summarize</text>
+            <rect x="540" y="60" width="100" height="40" rx="4" fill="#2CDCAA"/>
+            <text x="590" y="84" text-anchor="middle">Chatbot</text>
+            <rect x="670" y="60" width="80" height="40" rx="4" fill="#F5F4F7" stroke="#AFAAB9"/>
+            <text x="710" y="84" text-anchor="middle">Dashboard</text>
+          </g>
+          <!-- Arrows -->
+          <g stroke="#2CDCAA" stroke-width="1.5" fill="none" marker-end="url(#a)">
+            <line x1="110" y1="80" x2="140" y2="80"/>
+            <line x1="240" y1="80" x2="280" y2="38"/>
+            <line x1="240" y1="80" x2="280" y2="80"/>
+            <line x1="240" y1="80" x2="280" y2="122"/>
+            <line x1="380" y1="38" x2="410" y2="80"/>
+            <line x1="380" y1="80" x2="410" y2="80"/>
+            <line x1="380" y1="122" x2="410" y2="80"/>
+            <line x1="510" y1="80" x2="540" y2="80"/>
+            <line x1="640" y1="80" x2="670" y2="80"/>
+          </g>
+          <defs>
+            <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#2CDCAA"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="ph">Benefits</div>
+      <h3>Decisions made on<br>fresher signals.</h3>
+      <div class="benefits">
+        <div class="b">
+          <div class="mk">1</div>
+          <div class="txt">
+            <b>Efficient risk monitoring</b>
+            Map portfolio detail to live market data and surface emerging exposure points before they show up in P&amp;L.
+          </div>
+        </div>
+        <div class="b">
+          <div class="mk">2</div>
+          <div class="txt">
+            <b>Customizable insights</b>
+            Time frame, company, product, risk type — filters tuned to how the executive thinks, not how the data is stored.
+          </div>
+        </div>
+        <div class="b">
+          <div class="mk">3</div>
+          <div class="txt">
+            <b>Enhanced decision-making</b>
+            AI-driven recommendations grounded in sentiment analysis and experts' opinions, with traceable sources.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">10 / 10</div>
+  </section>
+
+</deck-stage>
+
+<script src="../slides/deck-stage.js"></script>
+</body>
+</html>

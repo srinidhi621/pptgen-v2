@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ascendion · Shadows & Elevation</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #F5F4F7; color: #0A0A0F; }
+  .card { width: 700px; padding: 28px 32px; box-sizing: border-box; }
+  .label { font-family: var(--font-body); font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #71758A; margin-bottom: 24px; }
+  .row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; }
+  .tile { background: #fff; aspect-ratio: 1 / 1; border-radius: 6px; display: grid; place-items: center; font-family: var(--font-mono); font-size: 11px; color: #71758A; text-align: center; }
+  .tile .n { color: #0A0A0F; font-weight: 700; font-family: var(--font-body); font-size: 11px; }
+  .sm { box-shadow: 0 1px 2px rgb(10 10 15 / 0.06), 0 1px 3px rgb(10 10 15 / 0.04); }
+  .md { box-shadow: 0 4px 10px rgb(10 10 15 / 0.06), 0 2px 4px rgb(10 10 15 / 0.04); }
+  .lg { box-shadow: 0 16px 40px rgb(10 10 15 / 0.10), 0 4px 12px rgb(10 10 15 / 0.06); }
+  .xl { box-shadow: 0 28px 80px rgb(10 10 15 / 0.18); }
+  .glow { box-shadow: 0 0 0 1px rgb(0 250 194 / 0.35), 0 0 40px rgb(0 250 194 / 0.25); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Shadows · neutral, never coloured (mint glow reserved for hero)</div>
+  <div class="row">
+    <div class="tile sm"><div><div class="n">sm</div><div>1·2·4</div></div></div>
+    <div class="tile md"><div><div class="n">md</div><div>4·10</div></div></div>
+    <div class="tile lg"><div><div class="n">lg</div><div>16·40</div></div></div>
+    <div class="tile xl"><div><div class="n">xl</div><div>28·80</div></div></div>
+    <div class="tile glow"><div><div class="n">mint glow</div><div>hero only</div></div></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ascendion · Dividers & Rules</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; color: #0A0A0F; }
+  .card { width: 700px; padding: 24px 32px; box-sizing: border-box; }
+  .label { font-family: var(--font-body); font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #71758A; margin-bottom: 14px; }
+  .row { display: grid; grid-template-columns: 100px 1fr; align-items: center; gap: 16px; padding: 10px 0; font-family: var(--font-mono); font-size: 10px; color: #71758A; }
+  .tag { color: #0A0A0F; font-family: var(--font-body); font-weight: 700; font-size: 11px; }
+  .hair { height: 1px; background: rgba(10,10,15,0.10); }
+  .strong { height: 2px; background: #0A0A0F; }
+  .mint { height: 3px; background: #00FAC2; }
+  .grad { height: 3px; background: linear-gradient(90deg, #FD0199, #52009B); }
+  .corner { height: 24px; position: relative; }
+  .corner::before { content: ""; position: absolute; left: 0; top: 0; width: 32px; height: 3px; background: #00FAC2; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Dividers & rules</div>
+  <div class="row"><span class="tag">Hairline</span><div class="hair"></div></div>
+  <div class="row"><span class="tag">Strong</span><div class="strong"></div></div>
+  <div class="row"><span class="tag">Mint accent</span><div class="mint"></div></div>
+  <div class="row"><span class="tag">Gradient</span><div class="grad"></div></div>
+  <div class="row"><span class="tag">Corner mark</span><div class="corner"></div></div>
+</div>
+</body>
+</html>

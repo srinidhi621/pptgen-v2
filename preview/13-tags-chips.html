@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ascendion · Tags & Chips</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; }
+  .card { width: 700px; padding: 24px 32px; box-sizing: border-box; }
+  .label { font-family: var(--font-body); font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #71758A; margin-bottom: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip { font-family: var(--font-body); font-weight: 700; font-size: 12px; padding: 6px 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; }
+  .chip-mint { background: #00FAC2; color: #0A0A0F; }
+  .chip-outline { background: transparent; border: 1px solid rgba(10,10,15,0.18); color: #0A0A0F; }
+  .chip-dot { width: 6px; height: 6px; border-radius: 999px; background: #00FAC2; }
+  .chip-purple { background: rgba(113,97,226,0.12); color: #5544c4; border:1px solid rgba(113,97,226,0.3); }
+  .chip-magenta { background: rgba(227,5,108,0.10); color: #b80451; border:1px solid rgba(227,5,108,0.3); }
+  .chip-cat { font-family: var(--font-body); font-weight: 800; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 10px; border-radius: 2px; color: #fff; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Tags & chips</div>
+  <div class="row">
+    <span class="chip chip-mint">AAVA™ Platform</span>
+    <span class="chip chip-mint">AI Arbitrage</span>
+    <span class="chip chip-outline"><span class="chip-dot"></span>Live</span>
+    <span class="chip chip-outline">Confidential</span>
+  </div>
+  <div class="row">
+    <span class="chip chip-purple">Agentic AI</span>
+    <span class="chip chip-magenta">Award · 2025</span>
+  </div>
+  <div class="label" style="margin-top:8px">Category eyebrows</div>
+  <div class="row">
+    <span class="chip-cat" style="background:#008566">Engineering<sup style="font-size:0.65em">AI</sup></span>
+    <span class="chip-cat" style="background:#7161E2">Applied AI</span>
+    <span class="chip-cat" style="background:#0A0A0F">Talent</span>
+    <span class="chip-cat" style="background:#E3056C">Recognition</span>
+  </div>
+</div>
+</body>
+</html>

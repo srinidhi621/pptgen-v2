@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ascendion · Form Fields</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; color: #0A0A0F; font-family: var(--font-body); }
+  .card { width: 700px; padding: 24px 32px; box-sizing: border-box; }
+  .label { font-family: var(--font-body); font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #71758A; margin-bottom: 14px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field label { display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #0A0A0F; margin-bottom: 6px; }
+  .field input, .field select, .field textarea { width: 100%; box-sizing: border-box; font-family: var(--font-body); font-size: 13px; padding: 9px 12px; border-radius: 3px; border: 1.5px solid rgba(10,10,15,0.18); background: #fff; color: #0A0A0F; outline: none; transition: all 140ms cubic-bezier(0.2,0.7,0.2,1); }
+  .field input:focus { border-color: #008566; box-shadow: 0 0 0 3px rgba(0,250,194,0.25); }
+  .field .hint { font-size: 11px; color: #71758A; margin-top: 4px; }
+  .field-err input { border-color: #E3056C; }
+  .field-err .hint { color: #E3056C; }
+  .check { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .check input { accent-color: #008566; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Form fields</div>
+  <div class="row">
+    <div class="field">
+      <label>Work email</label>
+      <input type="email" value="ana@enterprise.com">
+      <div class="hint">Focused state · mint ring</div>
+    </div>
+    <div class="field field-err">
+      <label>Company</label>
+      <input type="text" value="">
+      <div class="hint">Required field</div>
+    </div>
+  </div>
+  <div class="row" style="margin-top:14px">
+    <div class="field">
+      <label>Interest</label>
+      <select>
+        <option>AAVA™ Platform</option>
+        <option>Applied AI Services</option>
+      </select>
+    </div>
+    <div class="field" style="display:flex;align-items:flex-end">
+      <label class="check"><input type="checkbox" checked>I'd like to schedule a demo.</label>
+    </div>
+  </div>
+</div>
+</body>
+</html>

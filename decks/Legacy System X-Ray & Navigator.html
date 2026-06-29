@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ascendion · Legacy System X-Ray &amp; Navigator</title>
+
+<script>
+/* Preview-server token forwarder — no-op when the URL has no ?t= token,
+   so this is safe to ship in the downloaded file. */
+(function () {
+  var m = location.search.match(/[?&](t=[^&]+)/);
+  if (!m) return;
+  var tok = '?' + m[1];
+  function addTok(v) {
+    if (!v || v.indexOf('?') >= 0 || v.indexOf('data:') === 0 || v.indexOf('http') === 0 || v.indexOf('//') === 0) return v;
+    return v + tok;
+  }
+  function inlineSvg(img) {
+    fetch(img.src).then(function (r) { return r.text(); }).then(function (text) {
+      if (text.indexOf('<svg') < 0) return;
+      var wrap = document.createElement('span');
+      wrap.innerHTML = text;
+      var svg = wrap.querySelector('svg');
+      if (!svg) return;
+      if (img.className) svg.setAttribute('class', img.className);
+      if (img.getAttribute('style')) svg.setAttribute('style', img.getAttribute('style'));
+      var w = img.getAttribute('width'), h = img.getAttribute('height');
+      if (w) svg.setAttribute('width', w);
+      if (h) svg.setAttribute('height', h);
+      if (img.parentNode) img.parentNode.replaceChild(svg, img);
+    }).catch(function () {});
+  }
+  function fix(el) {
+    try {
+      if (el.tagName === 'IMG') {
+        var src = el.getAttribute('src');
+        if (!src) return;
+        var withTok = addTok(src);
+        if (withTok !== src) el.setAttribute('src', withTok);
+        if (/\.svg(\?|$)/i.test(withTok)) inlineSvg(el);
+      } else if (el.tagName === 'LINK') {
+        var h = el.getAttribute('href');
+        var withTok2 = addTok(h);
+        if (withTok2 !== h) el.setAttribute('href', withTok2);
+      } else if (el.tagName === 'SCRIPT' || el.tagName === 'SOURCE') {
+        var s = el.getAttribute('src');
+        var withTok3 = addTok(s);
+        if (withTok3 !== s) el.setAttribute('src', withTok3);
+      }
+    } catch (e) {}
+  }
+  new MutationObserver(function (muts) {
+    muts.forEach(function (m) {
+      m.addedNodes.forEach(function (n) {
+        if (n.nodeType !== 1) return;
+        if (['IMG','SCRIPT','LINK','SOURCE'].indexOf(n.tagName) >= 0) fix(n);
+        if (n.querySelectorAll) n.querySelectorAll('img,script,link,source').forEach(fix);
+      });
+    });
+  }).observe(document.documentElement, { subtree: true, childList: true });
+  function fixBgUrls() {
+    Array.from(document.styleSheets).forEach(function (sheet) {
+      try {
+        Array.from(sheet.cssRules || []).forEach(function (rule) {
+          if (!rule.style) return;
+          var bg = rule.style.backgroundImage || rule.style.background;
+          if (bg && bg.indexOf('url(') >= 0 && bg.indexOf('?t=') < 0 && bg.indexOf('data:') < 0) {
+            var fixed = bg.replace(/url\((['"]?)([^'")]+)\1\)/g, function (m, q, u) {
+              if (u.indexOf('http') === 0 || u.indexOf('//') === 0 || u.indexOf('data:') === 0 || u.indexOf('?') >= 0) return m;
+              return 'url(' + q + u + tok + q + ')';
+            });
+            if (fixed !== bg) rule.style.backgroundImage = fixed;
+          }
+        });
+      } catch (e) {}
+    });
+  }
+  document.addEventListener('DOMContentLoaded', fixBgUrls);
+  window.addEventListener('load', fixBgUrls);
+})();
+</script>
+
+<link rel="stylesheet" href="../colors_and_type.css">
+
+<style>
+  /* ============================================================
+     LEGACY SYSTEM X-RAY & NAVIGATOR  ·  Deck Styles
+     Matches the master template language from slides/index.html.
+     1920×1080 canvas, deck-stage handles letterboxing.
+     ============================================================ */
+  :root {
+    --stage-w: 1920px;
+    --stage-h: 1080px;
+    --pad: 96px;
+  }
+  html, body { margin: 0; padding: 0; background: #0A0A0F; overflow: hidden; }
+  deck-stage { background: #0A0A0F; }
+
+  section {
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: var(--pad);
+    display: flex;
+    flex-direction: column;
+    color: #0A0A0F;
+    background: #fff;
+    position: relative;
+  }
+  section.dark { background: #0A0A0F; color: #fff; }
+
+  /* ── Chrome ──────────────────────────────────────────── */
+  .chrome-wm   { position: absolute; top: 38px; left: var(--pad); height: 22px; }
+  .chrome-page { position: absolute; bottom: 38px; right: var(--pad); font-family: var(--font-mono); font-size: 14px; color: #71758A; letter-spacing: 0.16em; }
+  .chrome-conf { position: absolute; bottom: 38px; left: var(--pad); font-family: var(--font-body); font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #AFAAB9; }
+  section.dark .chrome-page,
+  section.dark .chrome-conf { color: rgba(255,255,255,0.5); }
+
+  /* Shared eyebrow */
+  .eyebrow {
+    font-family: var(--font-body); font-weight: 800;
+    font-size: 18px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #008566;
+  }
+  section.dark .eyebrow { color: #00FAC2; }
+
+  /* ────────────────────────────────────────────────────── */
+  /* 01 — TITLE                                             */
+  /* ────────────────────────────────────────────────────── */
+  .s-title { background: #0A0A0F; color: #fff; padding: 0; }
+  .s-title .hero-img {
+    position: absolute; inset: 0;
+    background: url('../assets/brand-imagery/cyberpunk-data-corridor.jpeg') center/cover;
+    opacity: 0.45;
+  }
+  .s-title .scrim {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(60% 80% at 80% 30%, rgba(0,250,194,0.18) 0%, transparent 60%),
+      linear-gradient(180deg, rgba(10,10,15,0.2) 0%, rgba(10,10,15,0.85) 75%, #0A0A0F 100%);
+  }
+  .s-title .schematic {
+    position: absolute; right: 80px; top: 200px; width: 720px; opacity: 0.75;
+  }
+  .s-title .content {
+    position: relative; z-index: 2;
+    padding: var(--pad);
+    height: 100%;
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .s-title .eyebrow { color: #00FAC2; margin-bottom: 36px; font-size: 22px; }
+  .s-title h1 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 164px; line-height: 0.86;
+    letter-spacing: -0.025em;
+    margin: 0; color: #fff;
+    max-width: 1500px;
+    text-wrap: balance;
+  }
+  .s-title h1 .mint { color: #00FAC2; }
+  .s-title .sub {
+    margin-top: 36px;
+    font-family: var(--font-body); font-size: 30px; font-weight: 300;
+    line-height: 1.35; color: #E8E6EC; max-width: 1200px;
+  }
+  .s-title .sub .accent { color: #00FAC2; font-weight: 600; }
+  .s-title .badges {
+    margin-top: 56px;
+    display: flex; gap: 16px;
+  }
+  .s-title .badges .b {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 22px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(0,250,194,0.32);
+    border-radius: 999px;
+    font-family: var(--font-body); font-weight: 800; font-size: 16px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: #fff;
+  }
+  .s-title .badges .b svg { width: 18px; height: 18px; stroke: #00FAC2; }
+
+  /* ────────────────────────────────────────────────────── */
+  /* 02 — BUSINESS PROBLEM (three columns + statement)      */
+  /* ────────────────────────────────────────────────────── */
+  .s-problem .eyebrow { margin: 40px 0 24px; }
+  .s-problem h2 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 88px; line-height: 0.96; letter-spacing: -0.02em;
+    margin: 0 0 56px; max-width: 1500px;
+  }
+  .s-problem .strip {
+    background: #0A0A0F; color: #fff;
+    padding: 28px 40px; border-radius: 6px;
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 38px; letter-spacing: -0.01em; line-height: 1.1;
+    margin-bottom: 36px;
+    display: flex; align-items: center; gap: 24px;
+  }
+  .s-problem .strip .mint { color: #00FAC2; }
+  .s-problem .strip .tag {
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 13px; font-weight: 400;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #71758A;
+  }
+  .s-problem .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .s-problem .col {
+    background: #F5F4F7; padding: 36px 32px; border-radius: 6px;
+    position: relative; display: flex; flex-direction: column;
+  }
+  .s-problem .col::before {
+    content:""; position: absolute; left:0; top:0; height: 4px; width: 64px; background: #00FAC2;
+  }
+  .s-problem .col .icon { width: 36px; height: 36px; stroke: #008566; margin-bottom: 22px; }
+  .s-problem .col .num {
+    font-family: var(--font-mono); font-size: 13px; color: #71758A;
+    letter-spacing: 0.16em; margin-bottom: 14px;
+  }
+  .s-problem .col h3 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 32px; line-height: 1.05; letter-spacing: -0.01em;
+    margin: 0 0 16px;
+  }
+  .s-problem .col p {
+    font-family: var(--font-body); font-size: 17px; line-height: 1.55;
+    color: #4A4D5F; margin: 0;
+  }
+
+  /* ────────────────────────────────────────────────────── */
+  /* 03 — WHY COPILOT-ALONE FAILS (two-column compare)      */
+  /* ────────────────────────────────────────────────────── */
+  .s-compare .eyebrow { margin: 40px 0 24px; }
+  .s-compare h2 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 76px; line-height: 0.98; letter-spacing: -0.02em;
+    margin: 0 0 56px; max-width: 1500px;
+  }
+  .s-compare h2 .strike {
+    text-decoration: line-through;
+    text-decoration-thickness: 7px;
+    text-decoration-color: #E3056C;
+    color: #71758A;
+  }
+  .s-compare .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+  .s-compare .side { border-radius: 6px; padding: 40px 36px; position: relative; }
+  .s-compare .side.left {
+    background: #F5F4F7; color: #0A0A0F;
+    border: 1px solid rgba(10,10,15,0.10);
+  }
+  .s-compare .side.right {
+    background: #0A0A0F; color: #fff;
+    border: 1px solid #00FAC2;
+    box-shadow: 0 0 0 1px rgb(0 250 194 / 0.35), 0 0 60px rgb(0 250 194 / 0.18);
+  }
+  .s-compare .side .tag {
+    font-family: var(--font-mono); font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #71758A; margin-bottom: 16px;
+  }
+  .s-compare .side.right .tag { color: #00FAC2; }
+  .s-compare .side h3 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 44px; line-height: 1.0; letter-spacing: -0.01em;
+    margin: 0 0 28px;
+  }
+  .s-compare .side .lede {
+    font-family: var(--font-body); font-size: 19px; line-height: 1.5;
+    color: #4A4D5F; margin: 0 0 24px;
+  }
+  .s-compare .side.right .lede { color: #AFAAB9; }
+  .s-compare .side ul { margin: 0; padding: 0; list-style: none; }
+  .s-compare .side li {
+    font-family: var(--font-body); font-size: 17px; line-height: 1.55;
+    padding: 11px 0 11px 24px; position: relative;
+    border-top: 1px solid rgba(10,10,15,0.08);
+  }
+  .s-compare .side.right li {
+    border-top-color: rgba(255,255,255,0.08); color: #E8E6EC;
+  }
+  .s-compare .side li:first-child { border-top: 0; }
+  .s-compare .side li::before {
+    content: "—"; position: absolute; left: 0; color: #71758A; font-weight: 700;
+  }
+  .s-compare .side.right li::before { content: "→"; color: #00FAC2; }
+  .s-compare .visual {
+    margin-top: 28px; padding-top: 28px;
+    border-top: 1px solid rgba(10,10,15,0.10);
+    display: flex; align-items: center; justify-content: center; height: 96px;
+  }
+  .s-compare .side.right .visual { border-top-color: rgba(255,255,255,0.10); }
+  .s-compare .stickies { display: flex; gap: 6px; transform: rotate(-3deg); }
+  .s-compare .sticky {
+    width: 64px; height: 64px;
+    background: #FFC000; border-radius: 2px;
+    box-shadow: 1px 2px 4px rgba(0,0,0,0.15);
+    transform: rotate(2deg);
+  }
+  .s-compare .sticky:nth-child(2) { background: #E3056C; transform: rotate(-4deg); }
+  .s-compare .sticky:nth-child(3) { background: #F26B43; transform: rotate(3deg); }
+  .s-compare .sticky:nth-child(4) { background: #7161E2; transform: rotate(-2deg); }
+
+  /* ────────────────────────────────────────────────────── */
+  /* 04 — THREE-TIER OVERVIEW (pipeline)                    */
+  /* ────────────────────────────────────────────────────── */
+  .s-pipeline .eyebrow { margin: 40px 0 24px; }
+  .s-pipeline h2 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 80px; line-height: 0.98; letter-spacing: -0.02em;
+    margin: 0 0 64px; max-width: 1500px;
+  }
+  .s-pipeline .pipe { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; align-items: stretch; }
+  .s-pipeline .tier {
+    position: relative;
+    background: #F5F4F7;
+    padding: 40px 36px 44px;
+    border-right: 1px solid #fff;
+  }
+  .s-pipeline .tier:last-child { border-right: 0; }
+  .s-pipeline .tier .head {
+    display: flex; align-items: center; gap: 18px; margin-bottom: 28px;
+  }
+  .s-pipeline .tier .marker {
+    width: 56px; height: 56px; border-radius: 4px;
+    background: #00FAC2; color: #0A0A0F;
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 900; font-size: 28px;
+  }
+  .s-pipeline .tier .meta {
+    font-family: var(--font-mono); font-size: 13px;
+    letter-spacing: 0.16em; color: #71758A;
+    text-transform: uppercase;
+  }
+  .s-pipeline .tier .meta b { display:block; color: #0A0A0F; font-size: 14px; font-family: var(--font-body); font-weight: 800; margin-top: 2px; letter-spacing: 0.08em; }
+  .s-pipeline .tier h3 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 36px; line-height: 1.0; letter-spacing: -0.01em;
+    margin: 0 0 16px;
+  }
+  .s-pipeline .tier p {
+    font-family: var(--font-body); font-size: 17px; line-height: 1.55;
+    color: #4A4D5F; margin: 0 0 24px;
+  }
+  .s-pipeline .tier .deliv {
+    font-family: var(--font-mono); font-size: 13px;
+    color: #008566; letter-spacing: 0.04em;
+    border-top: 1px solid rgba(10,10,15,0.10);
+    padding-top: 18px;
+  }
+  .s-pipeline .tier .icon { width: 28px; height: 28px; stroke: #008566; margin-bottom: 14px; }
+  .s-pipeline .arrow {
+    position: absolute; right: -14px; top: 64px;
+    width: 28px; height: 28px;
+    background: #0A0A0F; border-radius: 999px;
+    display: grid; place-items: center; z-index: 3;
+  }
+  .s-pipeline .arrow svg { width: 14px; height: 14px; stroke: #00FAC2; }
+  .s-pipeline .tier:last-child .arrow { display: none; }
+  .s-pipeline .maturity {
+    margin-top: 48px;
+    display: flex; align-items: center; gap: 0;
+    border-radius: 999px; overflow: hidden;
+    background: #E8E6EC;
+  }
+  .s-pipeline .maturity .step {
+    flex: 1; padding: 14px 28px;
+    font-family: var(--font-body); font-weight: 800;
+    font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: #71758A;
+    text-align: center;
+  }
+  .s-pipeline .maturity .step:nth-child(1) { background: #C9F8E7; color: #008566; }
+  .s-pipeline .maturity .step:nth-child(2) { background: #7FFDE0; color: #003A33; }
+  .s-pipeline .maturity .step:nth-child(3) { background: #00FAC2; color: #0A0A0F; }
+
+  /* ────────────────────────────────────────────────────── */
+  /* 05 — TIER 1 X-RAY (left diagram + right chat)          */
+  /* ────────────────────────────────────────────────────── */
+  .s-tier .eyebrow { margin: 40px 0 18px; }
+  .s-tier .ribbon {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #0A0A0F; color: #fff;
+    padding: 8px 16px; border-radius: 999px;
+    font-family: var(--font-body); font-weight: 800; font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .s-tier .ribbon .dot { width: 8px; height: 8px; border-radius: 50%; background: #00FAC2; }
+  .s-tier h2 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 64px; line-height: 0.98; letter-spacing: -0.02em;
+    margin: 0 0 18px; max-width: 1500px;
+  }
+  .s-tier .duration {
+    font-family: var(--font-mono); font-size: 16px; color: #71758A;
+    letter-spacing: 0.12em; margin-bottom: 36px;
+  }
+  .s-tier .body { display: grid; grid-template-columns: 1.15fr 1fr; gap: 48px; flex: 1; min-height: 0; }
+  .s-tier .body.invert { grid-template-columns: 1fr 1.15fr; }
+  .s-tier .panel {
+    background: #F5F4F7; border-radius: 6px; padding: 32px;
+    display: flex; flex-direction: column;
+  }
+  .s-tier .panel .ptitle {
+    font-family: var(--font-mono); font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #008566; margin-bottom: 18px;
+  }
+  .s-tier .bullets { display: flex; flex-direction: column; gap: 18px; padding-top: 8px; }
+  .s-tier .bullets li {
+    display: flex; gap: 16px; align-items: flex-start;
+    font-family: var(--font-body); font-size: 18px; line-height: 1.5;
+    color: #0A0A0F;
+    list-style: none;
+  }
+  .s-tier .bullets li .icon {
+    flex-shrink: 0; width: 28px; height: 28px;
+    border-radius: 999px; background: #00FAC2;
+    display: grid; place-items: center;
+    margin-top: 2px;
+  }
+  .s-tier .bullets li .icon svg { width: 14px; height: 14px; stroke: #0A0A0F; stroke-width: 2.4; }
+  .s-tier ul.bullets { padding: 0; margin: 0; }
+  .s-tier .stamps {
+    margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .s-tier .stamps .stamp {
+    font-family: var(--font-mono); font-size: 12px;
+    padding: 8px 14px; border: 1.5px dashed #008566; color: #008566;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    border-radius: 4px;
+    transform: rotate(-1deg);
+  }
+  .s-tier .stamps .stamp:nth-child(2n) { transform: rotate(1deg); }
+
+  /* Tier-1 specific: system map SVG + chat panel */
+  .s-tier .map-svg { width: 100%; flex: 1; }
+  .s-tier .chat {
+    background: #fff; border-radius: 6px; padding: 24px;
+    border: 1px solid rgba(10,10,15,0.10);
+    box-shadow: 0 8px 24px rgba(10,10,15,0.06);
+    display: flex; flex-direction: column; gap: 14px;
+    margin-top: 12px;
+  }
+  .s-tier .chat .head { display:flex; align-items:center; gap:10px; padding-bottom:12px; border-bottom: 1px solid rgba(10,10,15,0.08); }
+  .s-tier .chat .head .dot { width:10px; height:10px; border-radius:50%; background: #00FAC2; }
+  .s-tier .chat .head .ttl {
+    font-family: var(--font-body); font-weight: 800; font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+  .s-tier .chat .q {
+    font-family: var(--font-body); font-size: 16px; color: #71758A; font-style: italic;
+    padding: 12px 16px; background: #F5F4F7; border-radius: 6px;
+  }
+  .s-tier .chat .a {
+    font-family: var(--font-body); font-size: 16px; line-height: 1.55; color: #0A0A0F;
+  }
+  .s-tier .chat .a .h { background: rgba(0,250,194,0.22); padding: 0 4px; border-radius: 2px; }
+  .s-tier .chat .cite {
+    margin-top: 4px;
+    font-family: var(--font-mono); font-size: 12px;
+    color: #008566; letter-spacing: 0.04em;
+    padding: 10px 12px; background: #F5F4F7; border-left: 3px solid #00FAC2; border-radius: 0 4px 4px 0;
+  }
+  .s-tier .chat .cite b { color: #0A0A0F; font-family: var(--font-body); font-weight: 800; }
+
+  /* ────────────────────────────────────────────────────── */
+  /* 06 — TIER 2 NAVIGATOR (architecture + recipes)         */
+  /* ────────────────────────────────────────────────────── */
+  .s-tier .arch {
+    background: #fff; border-radius: 6px; padding: 28px;
+    border: 1px solid rgba(10,10,15,0.10);
+    margin-bottom: 18px;
+  }
+  .s-tier .arch-svg { width: 100%; height: auto; display: block; }
+  .s-tier .recipes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .s-tier .recipe {
+    background: #fff; border: 1px solid rgba(10,10,15,0.10);
+    border-radius: 6px; padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .s-tier .recipe .ico {
+    width: 24px; height: 24px; stroke: #008566;
+  }
+  .s-tier .recipe .name {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 16px; letter-spacing: -0.005em;
+    color: #0A0A0F;
+  }
+  .s-tier .recipe .ex {
+    font-family: var(--font-mono); font-size: 11px;
+    color: #008566; letter-spacing: 0.02em;
+  }
+  .s-tier .tourstrip {
+    margin-top: 12px;
+    display: flex; align-items: center; gap: 8px;
+    background: #0A0A0F; color: #fff;
+    border-radius: 6px; padding: 14px 18px;
+  }
+  .s-tier .tourstrip .lbl {
+    font-family: var(--font-body); font-weight: 800; font-size: 13px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: #00FAC2; margin-right: 8px;
+  }
+  .s-tier .tourstrip .step {
+    font-family: var(--font-mono); font-size: 13px;
+    color: rgba(255,255,255,0.6); letter-spacing: 0.04em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .s-tier .tourstrip .step.on { color: #fff; }
+  .s-tier .tourstrip .step .n {
+    width: 22px; height: 22px; border-radius: 999px;
+    background: rgba(255,255,255,0.08); display: grid; place-items: center;
+    font-weight: 700;
+  }
+  .s-tier .tourstrip .step.on .n { background: #00FAC2; color: #0A0A0F; }
+  .s-tier .tourstrip .step .arr { color: rgba(255,255,255,0.3); }
+
+  /* ────────────────────────────────────────────────────── */
+  /* 07 — TIER 3 MODERNIZATION (strangler)                  */
+  /* ────────────────────────────────────────────────────── */
+  .s-tier .strangler {
+    background: #fff; border-radius: 6px; padding: 28px;
+    border: 1px solid rgba(10,10,15,0.10);
+    margin-bottom: 16px;
+  }
+  .s-tier .strangler-svg { width: 100%; height: auto; display: block; }
+  .s-tier .artifacts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .s-tier .artifact {
+    background: #F5F4F7; border-radius: 6px; padding: 14px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: #4A4D5F; line-height: 1.5;
+    min-height: 96px; position: relative;
+  }
+  .s-tier .artifact .lbl {
+    font-family: var(--font-body); font-weight: 800; font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: #008566; margin-bottom: 8px;
+  }
+  .s-tier .artifact .seal {
+    position: absolute; top: 12px; right: 12px;
+    width: 22px; height: 22px;
+    stroke: #00FAC2;
+  }
+
+  /* ────────────────────────────────────────────────────── */
+  /* 08 — DIFFERENTIATION (table + non-negotiables)         */
+  /* ────────────────────────────────────────────────────── */
+  .s-diff .eyebrow { margin: 40px 0 24px; }
+  .s-diff h2 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 64px; line-height: 0.98; letter-spacing: -0.02em;
+    margin: 0 0 48px; max-width: 1500px;
+  }
+  .s-diff .table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    margin-bottom: 36px;
+  }
+  .s-diff .table thead th {
+    padding: 18px 24px;
+    font-family: var(--font-body); font-weight: 800; font-size: 14px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    text-align: left; vertical-align: middle;
+    border-bottom: 1px solid rgba(10,10,15,0.12);
+  }
+  .s-diff .table thead th.dim { color: #71758A; }
+  .s-diff .table thead th.us { color: #008566; }
+  .s-diff .table tbody td {
+    padding: 24px;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(10,10,15,0.08);
+  }
+  .s-diff .table tbody tr:last-child td { border-bottom: 0; }
+  .s-diff .table td.dim {
+    color: #71758A; text-decoration: line-through;
+    text-decoration-color: rgba(227,5,108,0.55);
+    text-decoration-thickness: 2px;
+  }
+  .s-diff .table td.us {
+    color: #0A0A0F; font-weight: 600;
+  }
+  .s-diff .table td.row-icon {
+    width: 56px; padding-right: 0;
+  }
+  .s-diff .table td.row-icon svg { width: 28px; height: 28px; stroke: #008566; }
+  .s-diff .table td.row-label {
+    width: 220px;
+    font-family: var(--font-display); font-weight: 900; font-size: 20px;
+    letter-spacing: -0.005em;
+    color: #0A0A0F;
+  }
+  .s-diff .table td.row-label .num {
+    display: block; font-family: var(--font-mono); font-size: 12px; font-weight: 400;
+    letter-spacing: 0.16em; color: #71758A; margin-bottom: 4px;
+  }
+  .s-diff .table p { margin: 0; font-family: var(--font-body); font-size: 18px; line-height: 1.5; }
+  .s-diff .nonneg {
+    background: #0A0A0F; color: #fff;
+    padding: 28px 36px; border-radius: 6px;
+    display: flex; align-items: center; gap: 36px;
+  }
+  .s-diff .nonneg .lbl {
+    font-family: var(--font-body); font-weight: 800; font-size: 13px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #00FAC2;
+    padding-right: 28px; border-right: 1px solid rgba(255,255,255,0.18);
+  }
+  .s-diff .nonneg .item {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: var(--font-display); font-weight: 900; font-size: 22px;
+    color: #fff;
+  }
+  .s-diff .nonneg .item svg { width: 22px; height: 22px; stroke: #00FAC2; }
+
+  /* ────────────────────────────────────────────────────── */
+  /* 09 — BUSINESS OUTCOMES (before/after + flywheel)       */
+  /* ────────────────────────────────────────────────────── */
+  .s-outcomes .eyebrow { margin: 40px 0 24px; }
+  .s-outcomes h2 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 68px; line-height: 0.98; letter-spacing: -0.02em;
+    margin: 0 0 36px; max-width: 1500px;
+  }
+  .s-outcomes .row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; flex: 1; min-height: 0; }
+  .s-outcomes .bars { display: flex; flex-direction: column; gap: 22px; }
+  .s-outcomes .bar { display: flex; flex-direction: column; gap: 10px; }
+  .s-outcomes .bar .label {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 24px; line-height: 1.1; letter-spacing: -0.005em;
+    color: #0A0A0F;
+  }
+  .s-outcomes .bar .track {
+    display: flex; align-items: center; gap: 16px;
+  }
+  .s-outcomes .bar .before {
+    flex: 1; height: 36px;
+    background: #E8E6EC; border-radius: 4px; position: relative;
+    display: flex; align-items: center; padding: 0 14px;
+  }
+  .s-outcomes .bar .before .span {
+    height: 22px; background: #AFAAB9; border-radius: 2px;
+  }
+  .s-outcomes .bar .before .tag {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    font-family: var(--font-mono); font-size: 12px; color: #4A4D5F;
+    letter-spacing: 0.08em;
+  }
+  .s-outcomes .bar .arrow { color: #008566; font-size: 24px; }
+  .s-outcomes .bar .after {
+    flex: 1; height: 36px;
+    background: #C9F8E7; border-radius: 4px; position: relative;
+    display: flex; align-items: center; padding: 0 14px;
+  }
+  .s-outcomes .bar .after .span {
+    height: 22px; background: #00FAC2; border-radius: 2px;
+  }
+  .s-outcomes .bar .after .tag {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    font-family: var(--font-mono); font-size: 12px; color: #003A33;
+    font-weight: 700; letter-spacing: 0.08em;
+  }
+  .s-outcomes .bar .sub {
+    font-family: var(--font-body); font-size: 15px; color: #71758A;
+  }
+  .s-outcomes .flywheel {
+    background: #F5F4F7; border-radius: 6px; padding: 24px 28px;
+    display: flex; flex-direction: column; gap: 12px;
+    overflow: hidden;
+  }
+  .s-outcomes .flywheel .ftitle {
+    font-family: var(--font-body); font-weight: 800; font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #008566;
+  }
+  .s-outcomes .flywheel .fsvg { flex: 1; }
+  .s-outcomes .placeholder {
+    font-family: var(--font-mono); font-size: 12px; color: #71758A;
+    letter-spacing: 0.08em; margin-top: 12px;
+  }
+
+  /* ────────────────────────────────────────────────────── */
+  /* 10 — ENGAGEMENT APPROACH (timeline)                    */
+  /* ────────────────────────────────────────────────────── */
+  .s-engage .eyebrow { margin: 40px 0 24px; }
+  .s-engage h2 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 72px; line-height: 0.98; letter-spacing: -0.02em;
+    margin: 0 0 56px; max-width: 1500px;
+  }
+  .s-engage .timeline {
+    position: relative;
+    padding: 24px 0 48px;
+  }
+  .s-engage .timeline .rail-line {
+    position: absolute; left: 28px; right: 28px; top: 50px;
+    height: 2px; background: linear-gradient(90deg, #E8E6EC 0%, #00FAC2 100%);
+  }
+  .s-engage .gates {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px;
+    position: relative; z-index: 2;
+  }
+  .s-engage .gate {
+    background: #F5F4F7; border-radius: 6px; padding: 64px 32px 32px;
+    position: relative;
+  }
+  .s-engage .gate .pin {
+    position: absolute; top: -22px; left: 28px;
+    width: 44px; height: 44px; border-radius: 999px;
+    background: #00FAC2; color: #0A0A0F;
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 900; font-size: 18px;
+    border: 4px solid #fff;
+  }
+  .s-engage .gate .when {
+    font-family: var(--font-mono); font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #008566; margin-bottom: 8px;
+  }
+  .s-engage .gate h3 {
+    font-family: var(--font-display); font-weight: 900;
+    font-size: 28px; line-height: 1.05; letter-spacing: -0.005em;
+    margin: 0 0 16px;
+  }
+  .s-engage .gate ul { margin: 0; padding: 0; list-style: none; }
+  .s-engage .gate li {
+    font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+    color: #4A4D5F; padding: 4px 0;
+  }
+  .s-engage .gate li::before {
+    content: "·"; color: #00FAC2; font-weight: 900; margin-right: 8px;
+  }
+  .s-engage .controls {
+    margin-top: 24px;
+    display: flex; align-items: center; gap: 36px;
+    padding: 20px 28px; background: #fff;
+    border: 1px solid rgba(10,10,15,0.10); border-radius: 6px;
+  }
+  .s-engage .controls .lbl {
+    font-family: var(--font-body); font-weight: 800; font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: #71758A;
+    padding-right: 24px; border-right: 1px solid rgba(10,10,15,0.10);
+  }
+  .s-engage .controls .item {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-body); font-weight: 700; font-size: 16px;
+    color: #0A0A0F;
+  }
+  .s-engage .controls .item svg { width: 18px; height: 18px; stroke: #008566; }
+  .s-engage .kit {
+    margin-top: 24px;
+    background: #0A0A0F; color: #fff; border-radius: 6px;
+    padding: 28px 32px;
+    display: flex; align-items: center; gap: 28px;
+  }
+  .s-engage .kit .label {
+    font-family: var(--font-body); font-weight: 800; font-size: 13px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #00FAC2;
+    padding-right: 28px; border-right: 1px solid rgba(255,255,255,0.18);
+  }
+  .s-engage .kit .deliv {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-display); font-weight: 900; font-size: 18px;
+    color: #fff;
+  }
+  .s-engage .kit .deliv::before {
+    content: "■"; color: #00FAC2; font-size: 12px;
+  }
+
+</style>
+</head>
+<body>
+
+<style>deck-stage:not(:defined){visibility:hidden}</style>
+<deck-stage>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       01 — TITLE
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-title dark" data-screen-label="01 Title">
+    <div class="hero-img"></div>
+    <div class="scrim"></div>
+
+    <!-- Schematic overlay: monolith silhouette with system-graph reveal -->
+    <svg class="schematic" viewBox="0 0 720 640" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!-- mainframe outline -->
+      <rect x="120" y="80" width="480" height="520" rx="6"
+            stroke="rgba(255,255,255,0.22)" stroke-width="2" fill="rgba(0,250,194,0.02)"/>
+      <rect x="160" y="120" width="400" height="40" rx="3"
+            stroke="rgba(255,255,255,0.18)" fill="rgba(255,255,255,0.04)"/>
+      <text x="180" y="146" font-family="JetBrains Mono, monospace" font-size="14"
+            fill="rgba(255,255,255,0.55)" letter-spacing="2">COBOL · FORTRAN · PL/SQL</text>
+      <!-- "x-ray reveal" — graph nodes/edges -->
+      <g stroke="#00FAC2" stroke-width="1.5" opacity="0.85">
+        <line x1="240" y1="240" x2="380" y2="290"/>
+        <line x1="380" y1="290" x2="500" y2="240"/>
+        <line x1="240" y1="240" x2="280" y2="400"/>
+        <line x1="280" y1="400" x2="420" y2="440"/>
+        <line x1="420" y1="440" x2="500" y2="380"/>
+        <line x1="500" y1="380" x2="500" y2="240"/>
+        <line x1="380" y1="290" x2="420" y2="440"/>
+        <line x1="380" y1="290" x2="320" y2="500"/>
+        <line x1="320" y1="500" x2="420" y2="440"/>
+      </g>
+      <g fill="#00FAC2">
+        <circle cx="240" cy="240" r="8"/>
+        <circle cx="380" cy="290" r="11"/>
+        <circle cx="500" cy="240" r="8"/>
+        <circle cx="280" cy="400" r="8"/>
+        <circle cx="420" cy="440" r="9"/>
+        <circle cx="500" cy="380" r="7"/>
+        <circle cx="320" cy="500" r="7"/>
+      </g>
+      <!-- node labels -->
+      <g font-family="JetBrains Mono, monospace" font-size="11" fill="rgba(255,255,255,0.55)">
+        <text x="200" y="226">Customer</text>
+        <text x="395" y="280">Account</text>
+        <text x="460" y="226">Policy</text>
+        <text x="240" y="420">JCL.RUN</text>
+        <text x="385" y="460">DB2.TX</text>
+        <text x="510" y="378">VSAM</text>
+      </g>
+      <!-- scan beam -->
+      <rect x="120" y="320" width="480" height="2" fill="#00FAC2" opacity="0.6"/>
+      <rect x="120" y="320" width="480" height="80" fill="url(#scanGrad)" opacity="0.3"/>
+      <defs>
+        <linearGradient id="scanGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#00FAC2" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#00FAC2" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" style="filter:invert(1) brightness(2)" alt="Ascendion">
+    <div class="content">
+      <div>
+        <div class="eyebrow">Offering Brief · 2026</div>
+        <h1>Legacy System<br><span class="mint">X-Ray</span> &amp; Navigator.</h1>
+        <div class="sub">AI-assisted understanding for mainframes and monoliths — from trapped SME knowledge to a <span class="accent">shared, governed system model</span> that de-risks modernization.</div>
+        <div class="badges">
+          <div class="b">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Traceable
+          </div>
+          <div class="b">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Client-controlled
+          </div>
+          <div class="b">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/><path d="M12 2a15 15 0 0 0 0 20"/></svg>
+            Org-wide model
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="chrome-page">01 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       02 — BUSINESS PROBLEM
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-problem" data-screen-label="02 Business Problem">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">The Business Problem</div>
+    <h2>Critical legacy systems<br>run the business —<br>yet only a handful of<br>SMEs understand them.</h2>
+
+    <div class="strip">
+      <span>Understanding is the <span class="mint">constraint.</span></span>
+      <span class="tag">/ THE COMPOUNDING TAX</span>
+    </div>
+
+    <div class="cols">
+      <div class="col">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+        <div class="num">01 — SME BOTTLENECK</div>
+        <h3>Knowledge is<br>trapped in heads.</h3>
+        <p>Critical COBOL, FORTRAN, PL/SQL and Java monoliths run core business processes, but the understanding of how they actually work lives with three or four people.</p>
+      </div>
+      <div class="col">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg>
+        <div class="num">02 — SLOW ONBOARDING</div>
+        <h3>Weeks to ramp.<br>Months to be useful.</h3>
+        <p>New engineers spend weeks doing impact analysis the slow way — reading code, asking SMEs, drawing diagrams that go stale the moment they're saved.</p>
+      </div>
+      <div class="col">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        <div class="num">03 — RISKY CHANGES</div>
+        <h3>Every release<br>is a gamble.</h3>
+        <p>"Just give five devs a copilot" helps individuals on the day, but it doesn't create the org-wide understanding needed to safely change a system nobody fully owns.</p>
+      </div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">02 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       03 — WHY COPILOT-ALONE FAILS
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-compare" data-screen-label="03 Why Copilot Fails">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">The anti-pattern</div>
+    <h2>Why <span class="strike">"just give the team Copilot"</span><br>fails on legacy estates.</h2>
+
+    <div class="pair">
+      <div class="side left">
+        <div class="tag">/ Tool-only</div>
+        <h3>Individual augmentation.</h3>
+        <p class="lede">IDE assistance is ephemeral and personal. Summaries live in chat history and local context — never the team's, never the estate's.</p>
+        <ul>
+          <li>Each developer rediscovers the same flows</li>
+          <li>Suggestions die with the editor tab</li>
+          <li>No shared model, no governance, no audit</li>
+          <li>SME dependency persists — the bus factor stays one</li>
+        </ul>
+        <div class="visual">
+          <div class="stickies">
+            <div class="sticky"></div>
+            <div class="sticky"></div>
+            <div class="sticky"></div>
+            <div class="sticky"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side right">
+        <div class="tag">/ Ascendion · Estate understanding</div>
+        <h3>A persistent system model.</h3>
+        <p class="lede">Call graphs, data flows, entity maps — built once, kept fresh, shared across the team. Governed and auditable.</p>
+        <ul>
+          <li>Call graphs and data flows the whole team queries</li>
+          <li>Onboarding tours that update with the codebase</li>
+          <li>Impact analysis the team trusts because it cites code</li>
+          <li>Knowledge that compounds instead of evaporating</li>
+        </ul>
+        <div class="visual">
+          <!-- atlas/graph icon -->
+          <svg width="170" height="80" viewBox="0 0 170 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g stroke="#00FAC2" stroke-width="1.5">
+              <line x1="30" y1="40" x2="70" y2="20"/>
+              <line x1="70" y1="20" x2="110" y2="40"/>
+              <line x1="110" y1="40" x2="150" y2="20"/>
+              <line x1="30" y1="40" x2="70" y2="60"/>
+              <line x1="70" y1="60" x2="110" y2="40"/>
+              <line x1="110" y1="40" x2="150" y2="60"/>
+              <line x1="70" y1="20" x2="70" y2="60"/>
+              <line x1="110" y1="40" x2="110" y2="40"/>
+            </g>
+            <g fill="#00FAC2">
+              <circle cx="30" cy="40" r="6"/>
+              <circle cx="70" cy="20" r="6"/>
+              <circle cx="70" cy="60" r="6"/>
+              <circle cx="110" cy="40" r="8"/>
+              <circle cx="150" cy="20" r="6"/>
+              <circle cx="150" cy="60" r="6"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">03 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       04 — THREE-TIER OVERVIEW
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-pipeline" data-screen-label="04 Three-Tier Overview">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">Our 3-Tier Offering</div>
+    <h2>Three tiers. One persistent<br>knowledge layer underneath.</h2>
+
+    <div class="pipe">
+      <div class="tier">
+        <div class="head">
+          <div class="marker">1</div>
+          <div class="meta">2 – 4 Weeks<br><b>Assessment</b></div>
+        </div>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <h3>Legacy<br>System X-Ray</h3>
+        <p>Rapid assessment, system map, and traceable Q&amp;A demo. We meet the estate where it is.</p>
+        <div class="deliv">→ System Atlas · Impact Maps · Demo</div>
+        <div class="arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </div>
+      </div>
+
+      <div class="tier">
+        <div class="head">
+          <div class="marker">2</div>
+          <div class="meta">Ongoing<br><b>Team Copilot</b></div>
+        </div>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        <h3>Legacy Code<br>Navigator</h3>
+        <p>Production-grade knowledge layer for daily engineering — query recipes, IDE plug-in, deployed in your VPC.</p>
+        <div class="deliv">→ Recipes · IDE · Knowledge API</div>
+        <div class="arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </div>
+      </div>
+
+      <div class="tier">
+        <div class="head">
+          <div class="marker">3</div>
+          <div class="meta">Multi-quarter<br><b>De-risked exit</b></div>
+        </div>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09Z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2Z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        <h3>Modernization<br>Accelerator</h3>
+        <p>Use the knowledge layer to prioritize, scope, and execute modernization — strangler patterns, refactors, re-platforming.</p>
+        <div class="deliv">→ Specs · Diagrams · Test Suggestions</div>
+      </div>
+    </div>
+
+    <div class="maturity">
+      <div class="step">Understanding</div>
+      <div class="step">Daily use</div>
+      <div class="step">Modernize</div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">04 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       05 — TIER 1 DEEP DIVE
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-tier" data-screen-label="05 Tier 1 X-Ray">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="ribbon"><span class="dot"></span> Tier 1 · Assessment</div>
+    <h2>Legacy System X-Ray.</h2>
+    <div class="duration">2 – 4 weeks · fixed scope · evidence-first</div>
+
+    <div class="body">
+      <!-- Left: bullets + stamps -->
+      <div>
+        <ul class="bullets">
+          <li>
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span>Parse legacy code, JCL/jobs and schemas into a <b>system map</b> — modules, interfaces, key business entities.</span>
+          </li>
+          <li>
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span>Produce entity-to-code <b>impact maps</b> for Customer, Account, Policy — plus a hot-spot analysis of fragile zones.</span>
+          </li>
+          <li>
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span>Ship an "<b>Ask Your Legacy System</b>" demo — query flows and rules with traceable references back to code.</span>
+          </li>
+        </ul>
+        <div class="stamps">
+          <div class="stamp">System Atlas</div>
+          <div class="stamp">Impact Maps</div>
+          <div class="stamp">Hot-spot Report</div>
+          <div class="stamp">Q&amp;A Demo</div>
+        </div>
+      </div>
+
+      <!-- Right: panel with system-map SVG + chat citation -->
+      <div class="panel">
+        <div class="ptitle">/ System Atlas — entity to code</div>
+        <svg class="map-svg" viewBox="0 0 460 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <g stroke="#008566" stroke-width="1.5" opacity="0.55">
+            <line x1="80" y1="60" x2="200" y2="40"/>
+            <line x1="200" y1="40" x2="320" y2="60"/>
+            <line x1="80" y1="60" x2="160" y2="140"/>
+            <line x1="160" y1="140" x2="280" y2="160"/>
+            <line x1="280" y1="160" x2="380" y2="140"/>
+            <line x1="380" y1="140" x2="320" y2="60"/>
+            <line x1="200" y1="40" x2="280" y2="160"/>
+            <line x1="200" y1="40" x2="160" y2="140"/>
+          </g>
+          <g fill="#008566">
+            <circle cx="80" cy="60" r="9"/>
+            <circle cx="200" cy="40" r="13" fill="#00FAC2" stroke="#008566" stroke-width="2"/>
+            <circle cx="320" cy="60" r="9"/>
+            <circle cx="160" cy="140" r="9"/>
+            <circle cx="280" cy="160" r="9"/>
+            <circle cx="380" cy="140" r="9" fill="#E3056C"/>
+          </g>
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="#0A0A0F">
+            <text x="48" y="80">CUSTNO</text>
+            <text x="180" y="26">ACCOUNT</text>
+            <text x="298" y="80">POLICY</text>
+            <text x="118" y="160">CALC.JCL</text>
+            <text x="246" y="180">RATE.PL1</text>
+          </g>
+          <g font-family="JetBrains Mono, monospace" font-size="9" fill="#E3056C">
+            <text x="362" y="124">⚠ HOT-SPOT</text>
+          </g>
+        </svg>
+
+        <div class="chat">
+          <div class="head">
+            <span class="dot"></span>
+            <span class="ttl">Ask Your Legacy System</span>
+          </div>
+          <div class="q">"What happens when a policy is cancelled mid-cycle?"</div>
+          <div class="a">
+            <b>CANCEL.CBL</b> hands off to <span class="h">RATE.PL1</span>, which writes a reversal entry through <span class="h">JCL.RUN_RECONCILE</span>. Pro-rated refund is calculated in <b>CALC-PRORATA</b>.
+          </div>
+          <div class="cite">
+            <b>Sources:</b><br>
+            ↳ CANCEL.CBL · L412–L487<br>
+            ↳ RATE.PL1 · L88–L102<br>
+            ↳ JCL/RUN_RECONCILE.JCL · L12
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">05 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       06 — TIER 2 DEEP DIVE
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-tier" data-screen-label="06 Tier 2 Navigator">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="ribbon"><span class="dot"></span> Tier 2 · Team Copilot</div>
+    <h2>Legacy Code Navigator.</h2>
+    <div class="duration">Production-grade knowledge layer · deployed in your VPC</div>
+
+    <div class="body invert">
+      <!-- Left: architecture + recipes + tour strip -->
+      <div>
+        <div class="arch">
+          <svg class="arch-svg" viewBox="0 0 700 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Column 1: sources -->
+            <g>
+              <rect x="20" y="30" width="120" height="32" rx="3" fill="#F5F4F7" stroke="#AFAAB9"/>
+              <rect x="20" y="74" width="120" height="32" rx="3" fill="#F5F4F7" stroke="#AFAAB9"/>
+              <rect x="20" y="118" width="120" height="32" rx="3" fill="#F5F4F7" stroke="#AFAAB9"/>
+              <text x="80" y="50" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#0A0A0F">code / repos</text>
+              <text x="80" y="94" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#0A0A0F">JCL / jobs</text>
+              <text x="80" y="138" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#0A0A0F">schemas / DDL</text>
+              <text x="80" y="180" text-anchor="middle" font-family="Nunito Sans, sans-serif" font-size="10" font-weight="800" fill="#71758A" letter-spacing="1.5">SOURCES</text>
+            </g>
+            <!-- arrows -->
+            <g stroke="#00FAC2" stroke-width="2" fill="none" marker-end="url(#a)">
+              <line x1="142" y1="46" x2="208" y2="90"/>
+              <line x1="142" y1="90" x2="208" y2="90"/>
+              <line x1="142" y1="134" x2="208" y2="90"/>
+            </g>
+            <!-- Column 2: ingestion -->
+            <g>
+              <rect x="210" y="70" width="130" height="44" rx="3" fill="#0A0A0F"/>
+              <text x="275" y="98" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#fff">INGESTION</text>
+              <text x="275" y="138" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#71758A">parse · embed · graph</text>
+              <text x="275" y="180" text-anchor="middle" font-family="Nunito Sans, sans-serif" font-size="10" font-weight="800" fill="#71758A" letter-spacing="1.5">PIPELINE</text>
+            </g>
+            <g stroke="#00FAC2" stroke-width="2" fill="none" marker-end="url(#a)">
+              <line x1="342" y1="92" x2="408" y2="92"/>
+            </g>
+            <!-- Column 3: knowledge layer -->
+            <g>
+              <rect x="410" y="50" width="160" height="84" rx="4" fill="#00FAC2" stroke="#008566" stroke-width="1.5"/>
+              <text x="490" y="82" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="15" fill="#0A0A0F">KNOWLEDGE</text>
+              <text x="490" y="102" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="15" fill="#0A0A0F">LAYER</text>
+              <text x="490" y="124" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#003A33">VPC-deployed</text>
+              <text x="490" y="180" text-anchor="middle" font-family="Nunito Sans, sans-serif" font-size="10" font-weight="800" fill="#008566" letter-spacing="1.5">SHARED MODEL</text>
+            </g>
+            <g stroke="#00FAC2" stroke-width="2" fill="none" marker-end="url(#a)">
+              <line x1="572" y1="70" x2="624" y2="46"/>
+              <line x1="572" y1="92" x2="624" y2="92"/>
+              <line x1="572" y1="114" x2="624" y2="138"/>
+            </g>
+            <!-- Column 4: surfaces -->
+            <g>
+              <rect x="626" y="30" width="60" height="32" rx="3" fill="#F5F4F7" stroke="#008566"/>
+              <rect x="626" y="74" width="60" height="32" rx="3" fill="#F5F4F7" stroke="#008566"/>
+              <rect x="626" y="118" width="60" height="32" rx="3" fill="#F5F4F7" stroke="#008566"/>
+              <text x="656" y="50" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#0A0A0F">IDE</text>
+              <text x="656" y="94" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#0A0A0F">Web</text>
+              <text x="656" y="138" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#0A0A0F">API</text>
+              <text x="656" y="180" text-anchor="middle" font-family="Nunito Sans, sans-serif" font-size="10" font-weight="800" fill="#71758A" letter-spacing="1.5">SURFACES</text>
+            </g>
+            <defs>
+              <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#00FAC2"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="recipes">
+          <div class="recipe">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            <div class="name">Impact analysis</div>
+            <div class="ex">"if I change X, what breaks?"</div>
+          </div>
+          <div class="recipe">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+            <div class="name">Business flow tracing</div>
+            <div class="ex">"how does premium calc work?"</div>
+          </div>
+          <div class="recipe">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            <div class="name">Explain this program</div>
+            <div class="ex">"walk me through CANCEL.CBL"</div>
+          </div>
+          <div class="recipe">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+            <div class="name">Data lineage</div>
+            <div class="ex">"where does CUSTNO end up?"</div>
+          </div>
+        </div>
+
+        <div class="tourstrip">
+          <span class="lbl">Guided Onboarding Tour</span>
+          <span class="step on"><span class="n">1</span>The estate map</span>
+          <span class="arr">›</span>
+          <span class="step on"><span class="n">2</span>Your team's modules</span>
+          <span class="arr">›</span>
+          <span class="step"><span class="n">3</span>First impact analysis</span>
+        </div>
+      </div>
+
+      <!-- Right: bullets -->
+      <div>
+        <ul class="bullets">
+          <li>
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span>Turn the X-Ray into a <b>production-grade knowledge layer</b> for daily engineering work.</span>
+          </li>
+          <li>
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span><b>Pre-built query recipes</b> — impact analysis, business flow tracing, "explain this program", data lineage.</span>
+          </li>
+          <li>
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span>Outputs always include <b>file paths and line numbers</b> — every answer is traceable to source.</span>
+          </li>
+          <li>
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span><b>Guided onboarding walkthroughs</b> for new engineers, plus optional IDE / web integration. Deployed in client VPC.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">06 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       07 — TIER 3 DEEP DIVE
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-tier" data-screen-label="07 Tier 3 Modernization">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="ribbon"><span class="dot"></span> Tier 3 · De-risked exit</div>
+    <h2>Modernization Accelerator.</h2>
+    <div class="duration">Strangler · re-platforming · refactor — semantics preserved</div>
+
+    <div class="body">
+      <div>
+        <ul class="bullets">
+          <li>
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span>Use the knowledge layer to <b>prioritize and de-risk modernization</b> — strangler pattern, refactors, re-platforming.</span>
+          </li>
+          <li>
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span>Generate candidate <b>interface specs</b>, <b>sequence diagrams</b>, and <b>test suggestions</b> from existing flows.</span>
+          </li>
+          <li>
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span>AI-assisted refactoring support so new code <b>preserves legacy semantics</b> while moving to modern stacks.</span>
+          </li>
+        </ul>
+        <div class="stamps">
+          <div class="stamp">Interface Specs</div>
+          <div class="stamp">Sequence Diagrams</div>
+          <div class="stamp">Test Suggestions</div>
+          <div class="stamp">Semantics-Preserved</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="strangler">
+          <svg class="strangler-svg" viewBox="0 0 700 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Phase labels -->
+            <text x="100" y="195" text-anchor="middle" font-family="Nunito Sans, sans-serif" font-size="10" font-weight="800" fill="#71758A" letter-spacing="1.5">DAY 0 · MONOLITH</text>
+            <text x="350" y="195" text-anchor="middle" font-family="Nunito Sans, sans-serif" font-size="10" font-weight="800" fill="#71758A" letter-spacing="1.5">PHASED CUTOVER</text>
+            <text x="600" y="195" text-anchor="middle" font-family="Nunito Sans, sans-serif" font-size="10" font-weight="800" fill="#71758A" letter-spacing="1.5">TARGET STATE</text>
+
+            <!-- Day 0 — full monolith -->
+            <rect x="40" y="40" width="120" height="120" rx="4" fill="#0A0A0F"/>
+            <text x="100" y="106" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="14" fill="#fff">MONOLITH</text>
+
+            <!-- Phased cutover — hollowed monolith + routing layer + emerging services -->
+            <rect x="250" y="50" width="80" height="100" rx="4" fill="#0A0A0F" opacity="0.55"/>
+            <text x="290" y="106" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="11" fill="#fff" opacity="0.9">LEGACY</text>
+
+            <rect x="345" y="80" width="50" height="40" rx="3" fill="#00FAC2"/>
+            <text x="370" y="105" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="9" fill="#0A0A0F">ROUTE</text>
+
+            <rect x="410" y="50" width="56" height="30" rx="3" fill="#F5F4F7" stroke="#008566"/>
+            <text x="438" y="69" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#0A0A0F">svc.a</text>
+            <rect x="410" y="86" width="56" height="30" rx="3" fill="#F5F4F7" stroke="#008566"/>
+            <text x="438" y="105" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#0A0A0F">svc.b</text>
+            <rect x="410" y="122" width="56" height="30" rx="3" fill="#F5F4F7" stroke="#008566"/>
+            <text x="438" y="141" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#0A0A0F">svc.c</text>
+
+            <!-- Target -->
+            <rect x="540" y="40" width="56" height="30" rx="3" fill="#00FAC2"/>
+            <text x="568" y="59" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="9" fill="#0A0A0F">svc.a</text>
+            <rect x="540" y="76" width="56" height="30" rx="3" fill="#00FAC2"/>
+            <text x="568" y="95" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="9" fill="#0A0A0F">svc.b</text>
+            <rect x="540" y="112" width="56" height="30" rx="3" fill="#00FAC2"/>
+            <text x="568" y="131" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="9" fill="#0A0A0F">svc.c</text>
+            <rect x="606" y="40" width="56" height="30" rx="3" fill="#00FAC2"/>
+            <text x="634" y="59" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="9" fill="#0A0A0F">svc.d</text>
+            <rect x="606" y="76" width="56" height="30" rx="3" fill="#00FAC2"/>
+            <text x="634" y="95" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="9" fill="#0A0A0F">svc.e</text>
+            <rect x="606" y="112" width="56" height="30" rx="3" fill="#00FAC2"/>
+            <text x="634" y="131" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="9" fill="#0A0A0F">svc.f</text>
+
+            <!-- arrows between phases -->
+            <g stroke="#AFAAB9" stroke-width="1.5" fill="none" marker-end="url(#b)">
+              <line x1="170" y1="100" x2="240" y2="100"/>
+              <line x1="476" y1="100" x2="530" y2="100"/>
+            </g>
+            <defs>
+              <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#AFAAB9"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="artifacts">
+          <div class="artifact">
+            <svg class="seal" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <div class="lbl">Interface spec</div>
+            POST /policies/{id}/cancel<br>
+            body: { reason, date }<br>
+            → 200 { refund, txId }
+          </div>
+          <div class="artifact">
+            <svg class="seal" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <div class="lbl">Sequence</div>
+            UI → CancelSvc<br>
+            CancelSvc → RateSvc<br>
+            RateSvc → Ledger
+          </div>
+          <div class="artifact">
+            <svg class="seal" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <div class="lbl">Test cases</div>
+            mid-cycle cancel<br>
+            day-of cancel<br>
+            grace-period cancel
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">07 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       08 — DIFFERENTIATION
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-diff" data-screen-label="08 Differentiation">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">Differentiation</div>
+    <h2>How this differs from "just buy<br>Cursor or Claude Code licenses".</h2>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th></th>
+          <th></th>
+          <th class="dim" style="width:32%">Tool licenses alone</th>
+          <th class="us" style="width:36%">Ascendion · X-Ray &amp; Navigator</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M9 6h6"/><path d="M9 18h6"/><path d="M6 9v6"/><path d="M18 9v6"/></svg>
+          </td>
+          <td class="row-label"><span class="num">01</span>Persistent model</td>
+          <td class="dim"><p>Ad-hoc file summaries that evaporate with the chat session.</p></td>
+          <td class="us"><p>Call graphs, data flows and entity maps maintained as a living artifact.</p></td>
+        </tr>
+        <tr>
+          <td class="row-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </td>
+          <td class="row-label"><span class="num">02</span>Shared governance</td>
+          <td class="dim"><p>Individual usage. Each developer rediscovers the same flow.</p></td>
+          <td class="us"><p>Knowledge shared across teams — onboarding tours, impact reports, dashboards.</p></td>
+        </tr>
+        <tr>
+          <td class="row-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </td>
+          <td class="row-label"><span class="num">03</span>Client-controlled</td>
+          <td class="dim"><p>SaaS-only context windows. Limited auditability for regulators.</p></td>
+          <td class="us"><p>Runs on-prem / VPC. Auditable, traceable, residency-aware by default.</p></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="nonneg">
+      <div class="lbl">Non-negotiables</div>
+      <div class="item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 12h-8"/><path d="M12 8v8"/></svg>
+        Traceable
+      </div>
+      <div class="item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Auditable
+      </div>
+      <div class="item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        VPC / on-prem
+      </div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">08 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       09 — BUSINESS OUTCOMES
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-outcomes" data-screen-label="09 Business Outcomes">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">Business Outcomes</div>
+    <h2>What changes when<br>the estate is understood.</h2>
+
+    <div class="row">
+      <div class="bars">
+        <div class="bar">
+          <div class="label">Onboarding time on legacy systems</div>
+          <div class="track">
+            <div class="before"><div class="span" style="width: 90%"></div><div class="tag">Months</div></div>
+            <div class="arrow">→</div>
+            <div class="after"><div class="span" style="width: 32%"></div><div class="tag">Weeks</div></div>
+          </div>
+          <div class="sub">New engineers productive in a fraction of the time, with a tour built from the live codebase.</div>
+        </div>
+
+        <div class="bar">
+          <div class="label">Impact-analysis effort for major changes</div>
+          <div class="track">
+            <div class="before"><div class="span" style="width: 80%"></div><div class="tag">Days</div></div>
+            <div class="arrow">→</div>
+            <div class="after"><div class="span" style="width: 22%"></div><div class="tag">Hours</div></div>
+          </div>
+          <div class="sub">"If I change X, what breaks?" answered with cited code instead of an SME's calendar.</div>
+        </div>
+
+        <div class="bar">
+          <div class="label">Dependency on a handful of legacy SMEs</div>
+          <div class="track">
+            <div class="before"><div class="span" style="width: 92%"></div><div class="tag">High</div></div>
+            <div class="arrow">→</div>
+            <div class="after"><div class="span" style="width: 28%"></div><div class="tag">Lower</div></div>
+          </div>
+          <div class="sub">A living knowledge base that survives retirements, reorgs, and tomorrow's modernization push.</div>
+        </div>
+
+        <div class="placeholder">/ Metrics are placeholders — tailored to client baseline during Tier 1 readout.</div>
+      </div>
+
+      <div class="flywheel">
+        <div class="ftitle">/ The Knowledge Flywheel</div>
+        <svg class="fsvg" viewBox="0 0 360 360" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- circle path -->
+          <circle cx="180" cy="180" r="118" stroke="#AFAAB9" stroke-width="1.5" stroke-dasharray="4 6" fill="none"/>
+          <!-- arrowheads along the wheel -->
+          <g fill="#00FAC2">
+            <polygon points="180,52 174,38 186,38"/>
+            <polygon points="308,180 322,174 322,186"/>
+            <polygon points="180,308 174,322 186,322"/>
+            <polygon points="52,180 38,174 38,186"/>
+          </g>
+          <!-- nodes -->
+          <g>
+            <circle cx="180" cy="62" r="36" fill="#00FAC2"/>
+            <text x="180" y="68" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#0A0A0F">LEARN</text>
+            <circle cx="298" cy="180" r="36" fill="#0A0A0F"/>
+            <text x="298" y="178" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="11" fill="#fff">DOCUMENT</text>
+            <text x="298" y="192" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="11" fill="#fff"></text>
+            <circle cx="180" cy="298" r="36" fill="#00FAC2"/>
+            <text x="180" y="304" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="13" fill="#0A0A0F">QUERY</text>
+            <circle cx="62" cy="180" r="36" fill="#0A0A0F"/>
+            <text x="62" y="178" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="11" fill="#fff">IMPROVE</text>
+          </g>
+          <!-- center -->
+          <circle cx="180" cy="180" r="28" fill="#fff" stroke="#0A0A0F" stroke-width="1.5"/>
+          <text x="180" y="178" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="11" fill="#0A0A0F">MODER-</text>
+          <text x="180" y="190" text-anchor="middle" font-family="Archivo Black, sans-serif" font-size="11" fill="#0A0A0F">NIZE</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">09 / 10</div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       10 — ENGAGEMENT APPROACH
+       ════════════════════════════════════════════════════════════════ -->
+  <section class="s-engage" data-screen-label="10 Engagement Approach">
+    <img class="chrome-wm" src="../assets/logos/ascendion-wordmark.svg" alt="Ascendion">
+    <div class="eyebrow">Engagement Approach · Typical</div>
+    <h2>Four weeks to a tiered roadmap<br>your team owns.</h2>
+
+    <div class="timeline">
+      <div class="rail-line"></div>
+      <div class="gates">
+        <div class="gate">
+          <div class="pin">0</div>
+          <div class="when">Week 0 · Scope</div>
+          <h3>Scope &amp; guardrails</h3>
+          <ul>
+            <li>Scope, access, success criteria</li>
+            <li>Security, audit, residency guardrails</li>
+            <li>SME interviews scheduled</li>
+            <li>Source-code intake handshake</li>
+          </ul>
+        </div>
+        <div class="gate">
+          <div class="pin">1</div>
+          <div class="when">Weeks 1 – 2 · Build</div>
+          <h3>Ingest &amp; map</h3>
+          <ul>
+            <li>Ingestion of code, jobs, schemas</li>
+            <li>Initial system map produced</li>
+            <li>First impact maps for key entities</li>
+            <li>Hot-spot analysis underway</li>
+          </ul>
+        </div>
+        <div class="gate">
+          <div class="pin">2</div>
+          <div class="when">Weeks 3 – 4 · Land</div>
+          <h3>Demo &amp; roadmap</h3>
+          <ul>
+            <li>Traceable Q&amp;A demo on real code</li>
+            <li>Findings readout with engineering &amp; risk</li>
+            <li>Tiered roadmap: Navigator + Modernization</li>
+            <li>Deployment plan for Tier 2</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <span class="lbl">Risk controls baked in</span>
+      <span class="item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/><path d="M12 2a15 15 0 0 0 0 20"/></svg>
+        Residency
+      </span>
+      <span class="item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Access control
+      </span>
+      <span class="item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Audit logs
+      </span>
+    </div>
+
+    <div class="kit">
+      <span class="label">Deliverables · Starter Kit</span>
+      <span class="deliv">System Atlas</span>
+      <span class="deliv">Impact Maps</span>
+      <span class="deliv">Query Recipes</span>
+      <span class="deliv">Deployment Plan</span>
+    </div>
+
+    <div class="chrome-conf">Ascendion Confidential</div>
+    <div class="chrome-page">10 / 10</div>
+  </section>
+
+</deck-stage>
+
+<script src="../slides/deck-stage.js"></script>
+</body>
+</html>

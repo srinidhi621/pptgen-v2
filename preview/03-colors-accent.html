@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ascendion · Accent Colors</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; }
+  .card { width: 700px; padding: 24px 28px; box-sizing: border-box; }
+  .row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .sw { aspect-ratio: 1.4 / 1; border-radius: 6px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; color: #fff; font-family: var(--font-body); font-size: 11px; line-height: 1.3; }
+  .sw .hex { font-family: var(--font-mono); font-size: 10px; opacity: 0.92; }
+  .sw .name { font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; font-size: 11px; }
+  .sw .use { font-size: 10px; opacity: 0.88; line-height: 1.3; }
+  .label { font-family: var(--font-body); font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #71758A; margin-bottom: 10px; }
+  .grad { aspect-ratio: 1.4 / 1; border-radius: 6px; padding: 10px 12px; color:#fff; font-family:var(--font-body); font-size:11px; background: linear-gradient(135deg, #FD0199 0%, #52009B 100%); display:flex; flex-direction:column; justify-content:space-between; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Accent colors · used sparingly</div>
+  <div class="row">
+    <div class="sw" style="background:#E3056C">
+      <div>
+        <div class="name">Magenta</div>
+        <div class="use">Awards · recognition</div>
+      </div>
+      <div class="hex">#E3056C</div>
+    </div>
+    <div class="sw" style="background:#7161E2">
+      <div>
+        <div class="name">Purple</div>
+        <div class="use">AI · agentic</div>
+      </div>
+      <div class="hex">#7161E2</div>
+    </div>
+    <div class="sw" style="background:#F26B43">
+      <div>
+        <div class="name">Orange</div>
+        <div class="use">Energy · data</div>
+      </div>
+      <div class="hex">#F26B43</div>
+    </div>
+    <div class="sw" style="background:#FFC000;color:#0A0A0F">
+      <div>
+        <div class="name">Yellow</div>
+        <div class="use" style="opacity:0.7">In-progress</div>
+      </div>
+      <div class="hex">#FFC000</div>
+    </div>
+  </div>
+  <div style="margin-top:12px">
+    <div class="label" style="margin-bottom:8px">Signature gradient · pink → purple</div>
+    <div style="height:48px;border-radius:6px;background:linear-gradient(90deg,#FD0199 0%,#52009B 100%);position:relative">
+      <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#fff;font-family:var(--font-mono);font-size:11px">#FD0199 → #52009B</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

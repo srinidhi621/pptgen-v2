@@ -1,0 +1,287 @@
+/* ============================================================
+   Ascendion Design System — Colors & Type Tokens
+   --------------------------------------------------------------
+   Source of truth: extracted from Corp Deck 2025 (Nov) +
+   Applied AI Offerings deck (slide master themes).
+   ============================================================ */
+
+/* -------- Webfonts (Google Fonts substitutions, see README) -- */
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:ital,wght@0,400..900;1,400..900&family=Big+Shoulders+Display:wght@400..900&family=Nunito+Sans:ital,wght@0,200..900;1,200..900&family=JetBrains+Mono:wght@300..700&display=swap');
+
+:root {
+  /* ────────────────────────────────────────────────────────────
+     CORE BRAND COLORS
+     The hero color is Mint #00FAC2 — the unmistakable Ascendion
+     accent. It almost always lives on dark or neutral backgrounds.
+     ──────────────────────────────────────────────────────────── */
+
+  /* Signature mint — the brand. Authoritative value from the
+     "25_New_ascendion colors" theme in the team reference deck. */
+  --asc-mint:           #2CDCAA;
+  --asc-mint-200:       #A8F0DA;   /* hover/lighter */
+  --asc-mint-700:       #1FB389;   /* pressed/darker */
+  --asc-mint-900:       #006450;   /* deep teal — secondary support */
+  --asc-mint-bright:    #00FAC2;   /* legacy / marketing-deck variant */
+
+  /* Brand neutrals */
+  --asc-black:          #000000;
+  --asc-ink:            #0A0A0F;   /* deck deep-black backgrounds */
+  --asc-graphite:       #1A1A22;   /* card-on-dark */
+  --asc-slate:          #71758A;   /* secondary body, dividers on dark */
+  --asc-fog:            #AFAAB9;   /* tertiary text */
+  --asc-mist:           #E8E6EC;   /* light dividers */
+  --asc-paper:          #F5F4F7;   /* off-white panel */
+  --asc-white:          #FFFFFF;
+
+  /* Accent palette — used sparingly for category coding,
+     awards / pull-quotes, never as primary fills */
+  --asc-magenta:        #8C0059;   /* awards, "highlight" callouts */
+  --asc-purple:         #6666CC;   /* AI / agentic category */
+  --asc-orange:         #F5821E;   /* energy / data callouts */
+  --asc-yellow:         #FFC000;   /* warnings, in-progress markers */
+  --asc-lavender:       #968CFA;   /* hyperlink — from brand theme */
+  --asc-pink-grad-1:    #FD0199;   /* signature gradient stop */
+  --asc-purple-grad-2:  #52009B;   /* signature gradient stop */
+
+  /* Semantic */
+  --color-success:      var(--asc-mint-700);
+  --color-warning:      var(--asc-yellow);
+  --color-danger:       var(--asc-magenta);
+  --color-info:         var(--asc-purple);
+
+  /* ────────────────────────────────────────────────────────────
+     SEMANTIC ROLES — LIGHT (default) THEME
+     Ascendion content lives on either bright white (decks / docs)
+     or deep ink-black (hero / brand moments). Both supported.
+     ──────────────────────────────────────────────────────────── */
+  --bg:                 var(--asc-white);
+  --bg-elev:            var(--asc-paper);
+  --bg-inset:           var(--asc-mist);
+  --fg:                 var(--asc-ink);
+  --fg-1:               var(--asc-ink);
+  --fg-2:               var(--asc-slate);
+  --fg-3:               var(--asc-fog);
+  --fg-on-dark:         var(--asc-white);
+  --accent:             var(--asc-mint-900);   /* readable on white */
+  --accent-strong:      var(--asc-mint);       /* on dark only */
+  --border:             rgba(10,10,15,0.10);
+  --border-strong:      rgba(10,10,15,0.22);
+  --shadow-rgb:         10 10 15;
+}
+
+/* Dark theme: deck hero slides, marketing moments */
+[data-theme="dark"], .asc-dark {
+  --bg:                 var(--asc-ink);
+  --bg-elev:            var(--asc-graphite);
+  --bg-inset:           #14141B;
+  --fg:                 var(--asc-white);
+  --fg-1:               var(--asc-white);
+  --fg-2:               var(--asc-fog);
+  --fg-3:               var(--asc-slate);
+  --accent:             var(--asc-mint);
+  --accent-strong:      var(--asc-mint);
+  --border:             rgba(255,255,255,0.12);
+  --border-strong:      rgba(255,255,255,0.28);
+  --shadow-rgb:         0 0 0;
+}
+
+/* ============================================================
+   TYPE SYSTEM
+   --------------------------------------------------------------
+   Brand fonts (commercial, not bundled):
+     · PP Neue Machina Plain  →  Display
+     · Avenir LT 45 Book      →  Body
+   Substitutes used in this system (see README "Font Substitutions"):
+     · Archivo Black / Big Shoulders Display → display
+     · Nunito Sans                            → body
+     · JetBrains Mono                         → mono
+   ============================================================ */
+:root {
+  --font-display:  "Archivo Black", "PP Neue Machina", "Helvetica Neue", system-ui, sans-serif;
+  --font-display-condensed: "Big Shoulders Display", "PP Neue Machina", "Impact", "Helvetica Neue", system-ui, sans-serif;
+  --font-body:     "Nunito Sans", "Aptos", "Avenir LT 45 Book", "Avenir Next", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono:     "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Type scale — 1920×1080 deck / large screen calibration */
+  --fs-eyebrow:   12px;    /* tracking 0.16em UPPERCASE */
+  --fs-micro:     13px;
+  --fs-body:      16px;
+  --fs-body-lg:   18px;
+  --fs-lede:      22px;
+  --fs-h6:        16px;
+  --fs-h5:        20px;
+  --fs-h4:        28px;
+  --fs-h3:        36px;
+  --fs-h2:        56px;
+  --fs-h1:        88px;
+  --fs-display:   140px;
+  --fs-mega:      220px;   /* full-bleed hero word */
+
+  /* Line heights */
+  --lh-tight:     0.92;
+  --lh-snug:      1.05;
+  --lh-body:      1.45;
+  --lh-relaxed:   1.6;
+
+  /* Tracking */
+  --tr-eyebrow:   0.16em;
+  --tr-display:   -0.015em;
+  --tr-mega:      -0.03em;
+}
+
+/* ──────── Element defaults ──────── */
+html, body {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, .asc-display, .asc-h1, .asc-h2, .asc-h3, .asc-h4 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tr-display);
+  color: var(--fg-1);
+  text-wrap: balance;
+  margin: 0 0 0.4em;
+}
+
+h1, .asc-h1     { font-size: var(--fs-h1); }
+h2, .asc-h2     { font-size: var(--fs-h2); }
+h3, .asc-h3     { font-size: var(--fs-h3); }
+h4, .asc-h4     { font-size: var(--fs-h4); line-height: var(--lh-snug); }
+h5, .asc-h5     {
+  font-family: var(--font-body); font-weight: 800;
+  font-size: var(--fs-h5); line-height: var(--lh-snug); margin: 0 0 0.5em;
+}
+h6, .asc-h6     {
+  font-family: var(--font-body); font-weight: 700;
+  font-size: var(--fs-h6); line-height: var(--lh-snug); margin: 0 0 0.5em;
+}
+
+.asc-display     { font-size: var(--fs-display); line-height: var(--lh-tight); }
+.asc-mega        {
+  font-family: var(--font-display-condensed);
+  font-weight: 900;
+  font-size: var(--fs-mega);
+  line-height: 0.86;
+  letter-spacing: var(--tr-mega);
+  text-transform: uppercase;
+}
+
+p, .asc-body { font-size: var(--fs-body); line-height: var(--lh-body); margin: 0 0 1em; }
+.asc-lede     { font-family: var(--font-body); font-weight: 300; font-size: var(--fs-lede); line-height: var(--lh-relaxed); }
+.asc-eyebrow  {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--tr-eyebrow);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+a       { color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
+a:hover { color: var(--asc-mint-700); }
+
+code, kbd, pre, .asc-mono { font-family: var(--font-mono); font-size: 0.92em; }
+
+/* Marquee stat — the recurring "11,000+" / "400+" treatment */
+.asc-stat {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 96px;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--asc-mint-900);
+}
+[data-theme="dark"] .asc-stat, .asc-dark .asc-stat { color: var(--asc-mint); }
+.asc-stat__label {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+  margin-top: 4px;
+}
+
+/* The trademarked product treatment: AAVA™, METAL, JUMP, RECODE */
+.asc-tm {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+.asc-tm sup { font-size: 0.5em; vertical-align: super; font-weight: 700; }
+
+/* Signature gradient (pink → purple) used as thin underline / divider */
+.asc-grad-rule {
+  height: 3px;
+  background: linear-gradient(90deg, var(--asc-pink-grad-1) 0%, var(--asc-purple-grad-2) 100%);
+  border: 0;
+}
+
+/* ============================================================
+   SPACING, RADII, SHADOWS, MOTION
+   ============================================================ */
+:root {
+  /* Spacing — 4px base, decks use generous values */
+  --sp-0:  0;
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  24px;
+  --sp-6:  32px;
+  --sp-7:  48px;
+  --sp-8:  64px;
+  --sp-9:  96px;
+  --sp-10: 128px;
+
+  /* Radii — restrained. The brand favors sharp / slight corners */
+  --radius-0:  0;
+  --radius-1:  2px;
+  --radius-2:  4px;
+  --radius-3:  8px;
+  --radius-4:  12px;
+  --radius-pill: 999px;
+
+  /* Shadows — soft, neutral. Mint glow reserved for hero moments */
+  --shadow-sm:  0 1px 2px rgb(var(--shadow-rgb) / 0.06), 0 1px 3px rgb(var(--shadow-rgb) / 0.04);
+  --shadow-md:  0 4px 10px rgb(var(--shadow-rgb) / 0.06), 0 2px 4px rgb(var(--shadow-rgb) / 0.04);
+  --shadow-lg:  0 16px 40px rgb(var(--shadow-rgb) / 0.10), 0 4px 12px rgb(var(--shadow-rgb) / 0.06);
+  --shadow-xl:  0 28px 80px rgb(var(--shadow-rgb) / 0.18);
+  --shadow-mint-glow: 0 0 0 1px rgb(0 250 194 / 0.35), 0 0 40px rgb(0 250 194 / 0.25);
+
+  /* Motion */
+  --ease-out:   cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast:   140ms;
+  --dur-base:   220ms;
+  --dur-slow:   420ms;
+}
+
+/* ============================================================
+   UTILITY SURFACES
+   ============================================================ */
+.asc-surface-dark   { background: var(--asc-ink);    color: var(--asc-white); }
+.asc-surface-mint   { background: var(--asc-mint);   color: var(--asc-ink);   }
+.asc-surface-paper  { background: var(--asc-paper);  color: var(--asc-ink);   }
+.asc-surface-white  { background: var(--asc-white);  color: var(--asc-ink);   }
+
+/* "Knockout image text" — the signature A-filled-with-photography effect */
+.asc-knockout {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--font-display-condensed);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+/* Selection */
+::selection { background: var(--asc-mint); color: var(--asc-ink); }

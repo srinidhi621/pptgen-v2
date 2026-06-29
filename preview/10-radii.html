@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ascendion · Radii</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; color: #0A0A0F; }
+  .card { width: 700px; padding: 24px 32px; box-sizing: border-box; }
+  .label { font-family: var(--font-body); font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #71758A; margin-bottom: 16px; }
+  .row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .item { text-align: center; font-family: var(--font-mono); font-size: 11px; color: #71758A; }
+  .item .box { aspect-ratio: 1 / 1; background: #00FAC2; margin-bottom: 8px; border: 1px solid #008566; }
+  .item .n { color: #0A0A0F; font-weight: 700; font-family: var(--font-body); font-size: 11px; }
+  .note { margin-top: 16px; font-family: var(--font-body); font-size: 12px; color: #71758A; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Corner radii · restrained, mostly sharp</div>
+  <div class="row">
+    <div class="item"><div class="box" style="border-radius:0"></div><div class="n">radius-0</div><div>0px</div></div>
+    <div class="item"><div class="box" style="border-radius:2px"></div><div class="n">radius-1</div><div>2px</div></div>
+    <div class="item"><div class="box" style="border-radius:4px"></div><div class="n">radius-2</div><div>4px</div></div>
+    <div class="item"><div class="box" style="border-radius:8px"></div><div class="n">radius-3</div><div>8px</div></div>
+    <div class="item"><div class="box" style="border-radius:12px"></div><div class="n">radius-4</div><div>12px</div></div>
+    <div class="item"><div class="box" style="border-radius:999px"></div><div class="n">pill</div><div>999</div></div>
+  </div>
+  <div class="note">Cards prefer <b>radius-2</b> or <b>radius-3</b>. The brand favors sharp or slightly softened edges — pill shapes are reserved for tags and CTAs.</div>
+</div>
+</body>
+</html>

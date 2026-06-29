@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ascendion · Motion Tokens</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; color: #0A0A0F; }
+  .card { width: 700px; padding: 24px 32px; box-sizing: border-box; }
+  .label { font-family: var(--font-body); font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #71758A; margin-bottom: 14px; }
+  .row { display: grid; grid-template-columns: 110px 1fr 120px; gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid rgba(10,10,15,0.06); font-family: var(--font-mono); font-size: 10.5px; color: #71758A; }
+  .name { color: #0A0A0F; font-family: var(--font-body); font-weight: 700; font-size: 12px; }
+  .track { position: relative; height: 24px; background: #F5F4F7; border-radius: 2px; overflow: hidden; }
+  .dot { position: absolute; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; background: #00FAC2; border-radius: 2px; left: 4px; animation: slide 2.4s infinite; }
+  .dot.fast { animation-duration: 0.9s; animation-timing-function: cubic-bezier(0.2,0.7,0.2,1); }
+  .dot.base { animation-duration: 1.6s; animation-timing-function: cubic-bezier(0.2,0.7,0.2,1); }
+  .dot.slow { animation-duration: 2.4s; animation-timing-function: cubic-bezier(0.65,0,0.35,1); }
+  @keyframes slide {
+    0%, 12%   { left: 4px; }
+    50%, 62%  { left: calc(100% - 22px); }
+    100%      { left: 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Motion · engineered, never bouncy</div>
+  <div class="row"><span class="name">dur-fast</span><div class="track"><div class="dot fast"></div></div><span>140ms · out</span></div>
+  <div class="row"><span class="name">dur-base</span><div class="track"><div class="dot base"></div></div><span>220ms · out</span></div>
+  <div class="row"><span class="name">dur-slow</span><div class="track"><div class="dot slow"></div></div><span>420ms · in-out</span></div>
+</div>
+</body>
+</html>
